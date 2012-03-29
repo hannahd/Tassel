@@ -3,94 +3,100 @@ require_once ("../constants/constants.php");
 require_once (ROOT."/constants/dbconnect.php"); //Includes database connection
 require_once (ROOT."/constants/functions.php"); //Includes functions
 require_once (ROOT."/constants/validation-functions.php");
+require_once (ROOT."/constants/access-functions.php"); //Includes functions to control user privileges
+
+secure_page();
 
 if(isset($_GET['p'])) {
-	$md5_id = sanitize($_GET['p']);
-	$profile = mysql_query("SELECT *, AES_DECRYPT(email, '". SALT ."') AS usr_email FROM ". TBL_PROFILE ." WHERE md5_id = '$md5_id'") or die(error_message("Could not access database", mysql_error(),21));
-	list($id, $username, , , , $first_name, $last_name, $photo, $enabled, $approved, $user_level, $position, $date_created, $ip_address, , , , $num_logins, , $last_login, $email) = mysql_fetch_row($profile);
-	switch ($position) {
-	    case 'faculty':
-	        $faculty = mysql_query("SELECT * FROM ". TBL_FACULTY ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));	
-			list(, $title, $department_id, $phone, $office_location, $education, $bio, $start_date_str, $last_update) = mysql_fetch_row($faculty);
-			$start_date = explode("-", $start_date_str);
-			if(!empty($department_id)){
-				$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
-				$college_array = mysql_fetch_row($college);
-				$college_id = $college_array[0];
-			}
-			break;
-	    case 'student':
-			$student = mysql_query("SELECT * FROM ". TBL_STUDENT ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));	
-			list(, $program_id, $department_id, $comajor_department_id, $phone, $office_location, $title, $company, $home_city, $state_id, $country_id, $education,  $bio, $start_date_str, $grad_date_str, $last_update, $admission_status) = mysql_fetch_row($student);
-			$start_date = explode("-", $start_date_str);
-			$grad_date = explode("-", $grad_date_str);
-			if(!empty($department_id)){
-				$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
-				$college_array = mysql_fetch_row($college);
-				$college_id = $college_array[0];
-			}
-			if(!empty($comajor_department_id)){
-				$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$comajor_department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
-				$college_array = mysql_fetch_row($college);
-				$comajor_college_id = $college_array[0];
-			}
-			break;
-	    case 'staff':
-	        $staff = mysql_query("SELECT * FROM ". TBL_STAFF ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));
-			list(, $title, $phone, $office_location, $bio, $start_date_str, $last_update) = mysql_fetch_row($staff);
-			$start_date = explode("-", $start_date_str);
-			break;
-		case 'alumni':
-			$alumni = mysql_query("SELECT * FROM ". TBL_ALUMNI ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));	
-			list(, $program_id, $department_id, $comajor_department_id, $title, $company, $company_city, $state_id, $country_id, $dissertation_title, $education,  $bio, $start_date_str, $grad_date_str, $last_update) = mysql_fetch_row($alumni);
-			$start_date = explode("-", $start_date_str);
-			$grad_date = explode("-", $grad_date_str);
-			if(!empty($department_id)){
-				$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
-				$college_array = mysql_fetch_row($college);
-				$college_id = $college_array[0];
-			}
-			if(!empty($comajor_department_id)){
-				$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$comajor_department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
-				$college_array = mysql_fetch_row($college);
-				$comajor_college_id = $college_array[0];
-			}
-break;
-		case 'visitor':
-	        $visitor = mysql_query("SELECT * FROM ". TBL_VISITOR ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));
-			list(, $title, $department_id, $phone, $office_location, $education, $bio, $start_date_str, $last_update) = mysql_fetch_row($visitor);
-			$start_date = explode("-", $start_date_str);
-			if(!empty($department_id)){
-				$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
-				$college_array = mysql_fetch_row($college);
-				$college_id = $college_array[0];
-			}
-			break;
-	}
+	//Check that either the person owns this profile or this is an admin
+	if(isset($_SESSION['encrypted_id']) && ($_GET['p'] === $_SESSION['encrypted_id'] || is_admin())){
+		$md5_id = sanitize($_GET['p']);
+		$profile = mysql_query("SELECT *, AES_DECRYPT(email, '". SALT ."') AS usr_email FROM ". TBL_PROFILE ." WHERE md5_id = '$md5_id'") or die(error_message("Could not access database", mysql_error(),21));
+		list($id, $username, , , , $first_name, $last_name, $photo, $enabled, $user_level, $position, $date_created, $ip_address, , , , $num_logins, , $last_login, $email) = mysql_fetch_row($profile);
+		switch ($position) {
+		    case 'faculty':
+		        $faculty = mysql_query("SELECT * FROM ". TBL_FACULTY ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));	
+				list(, $title, $department_id, $phone, $office_location, $education, $bio, $start_date_str, $last_update) = mysql_fetch_row($faculty);
+				$start_date = explode("-", $start_date_str);
+				if(!empty($department_id)){
+					$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+					$college_array = mysql_fetch_row($college);
+					$college_id = $college_array[0];
+				}
+				break;
+		    case 'student':
+				$student = mysql_query("SELECT * FROM ". TBL_STUDENT ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));	
+				list(, $program_id, $department_id, $comajor_department_id, $phone, $office_location, $title, $company, $home_city, $state_id, $country_id, $education,  $bio, $start_date_str, $grad_date_str, $last_update, $admission_status) = mysql_fetch_row($student);
+				$start_date = explode("-", $start_date_str);
+				$grad_date = explode("-", $grad_date_str);
+				if(!empty($department_id)){
+					$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+					$college_array = mysql_fetch_row($college);
+					$college_id = $college_array[0];
+				}
+				if(!empty($comajor_department_id)){
+					$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$comajor_department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+					$college_array = mysql_fetch_row($college);
+					$comajor_college_id = $college_array[0];
+				}
+				break;
+		    case 'staff':
+		        $staff = mysql_query("SELECT * FROM ". TBL_STAFF ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));
+				list(, $title, $phone, $office_location, $bio, $start_date_str, $last_update) = mysql_fetch_row($staff);
+				$start_date = explode("-", $start_date_str);
+				break;
+			case 'alumni':
+				$alumni = mysql_query("SELECT * FROM ". TBL_ALUMNI ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));	
+				list(, $program_id, $department_id, $comajor_department_id, $title, $company, $company_city, $state_id, $country_id, $dissertation_title, $education,  $bio, $start_date_str, $grad_date_str, $last_update) = mysql_fetch_row($alumni);
+				$start_date = explode("-", $start_date_str);
+				$grad_date = explode("-", $grad_date_str);
+				if(!empty($department_id)){
+					$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+					$college_array = mysql_fetch_row($college);
+					$college_id = $college_array[0];
+				}
+				if(!empty($comajor_department_id)){
+					$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$comajor_department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+					$college_array = mysql_fetch_row($college);
+					$comajor_college_id = $college_array[0];
+				}
+	break;
+			case 'visitor':
+		        $visitor = mysql_query("SELECT * FROM ". TBL_VISITOR ." WHERE profile_id = '$id'") or die(error_message("Could not access database", mysql_error(),21));
+				list(, $title, $department_id, $phone, $office_location, $education, $bio, $start_date_str, $last_update) = mysql_fetch_row($visitor);
+				$start_date = explode("-", $start_date_str);
+				if(!empty($department_id)){
+					$college = mysql_query("SELECT college_id FROM ". TBL_DEPARTMENT ." WHERE id = '$department_id' LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+					$college_array = mysql_fetch_row($college);
+					$college_id = $college_array[0];
+				}
+				break;
+		}
 	
-	// Strip slashes from input fields for values that are set
-	if(isset($phone)){ $phone = stripslashes($phone); }  
-	if(isset($first_name)){ $first_name = stripslashes($first_name); }
-	if(isset($last_name)){ $last_name = stripslashes($last_name); }
-	if(isset($photo)){ $photo = stripslashes($photo); }
-	if(isset($office_location)){ $office_location = stripslashes($office_location); } 
-	if(isset($title)){ $title = stripslashes($title); }  
-	if(isset($company)){ $company = stripslashes($company); }
-	if(isset($home_city)){ $home_city = stripslashes($home_city); }
-	if(isset($company_city)){ $home_city = stripslashes($company_city); }
-	if(isset($dissertation_title)){ $dissertation_title = stripslashes($dissertation_title); }
-	
-	// Add slashes for the text area input fields
-	if(isset($bio)){ 
-		$bio = addslashes($bio); 
-		$bio = str_replace("\n", "\\n", $bio);
-		$bio = str_replace("\r", "\\r", $bio);
-	}
-	if(isset($education)){ 
-		$education = addslashes($education); 
-		$education = str_replace("\n", "\\n", $education);
-		$education = str_replace("\r", "\\r", $education);
-	}
+		// Strip slashes from input fields for values that are set
+		if(isset($phone)){ $phone = stripslashes($phone); }  
+		if(isset($first_name)){ $first_name = stripslashes($first_name); }
+		if(isset($last_name)){ $last_name = stripslashes($last_name); }
+		if(isset($photo)){ $photo = trim(stripslashes($photo)); }
+		if(isset($office_location)){ $office_location = stripslashes(html_entity_decode($office_location)); } 
+		if(isset($title)){ $title = stripslashes(html_entity_decode($title)); }  
+		if(isset($company)){ $company = stripslashes(html_entity_decode($company)); }
+		if(isset($home_city)){ $home_city = stripslashes($home_city); }
+		if(isset($company_city)){ $home_city = stripslashes($company_city); }
+		if(isset($dissertation_title)){ $dissertation_title = stripslashes(html_entity_decode($dissertation_title)); }
+		// Add slashes for the text area input fields
+		if(isset($bio)){ 
+			$bio = html_entity_decode($bio);
+			$bio = addslashes($bio); 
+			$bio = str_replace("\n", "\\n", $bio);
+			$bio = str_replace("\r", "\\r", $bio);
+		}
+		if(isset($education)){ 
+			$education = html_entity_decode($education);
+			$education = addslashes($education); 
+			$education = str_replace("\n", "\\n", $education);
+			$education = str_replace("\r", "\\r", $education);
+		}
 ?>
 <!DOCTYPE html>
 <head>
@@ -271,6 +277,7 @@ break;
 					data: datastring,
 					success: function(response) {
 						// Display errors or success
+						$('body,html').animate({scrollTop: 0}, 800);
 						$('#message').show().html(response);
 					}
 					});
@@ -352,8 +359,13 @@ break;
 	</script>
 </head>
 <body>
-	<noscript><p class="error message"Javascript must be enabled to use this form.</p></noscript>
-		<span id="message"></span>
+	<?php include ROOT.'/constants/navbar.php'; ?>
+	<div class="container">
+		<h1>Edit Profile</h1>
+		<noscript><p class="error alert"Javascript must be enabled to use this form.</p></noscript>
+		<span id="message"
+
+></span>
 		<form method="post" name="profile-form" id="profile-form">
 			<fieldset id="profile-set">
 				<label for="first_name">First Name</label>  
@@ -559,7 +571,7 @@ break;
 					<?php }?>
 				</span>
 				
-				<label for="student_comajor">
+				<label for="student_comajor" class="checkbox">
 					<input type="checkbox" name="student_comajor" id="student-comajor" value="yes">
 					<span>Seeking Co-major</span>
 				</label>
@@ -658,7 +670,7 @@ break;
 					?>
 				</select>
 				
-				<label for="student_admission_status">
+				<label for="student_admission_status" class="checkbox">
 					<input type="checkbox" name="student_admission_status" id="student-admission-status" value="yes">
 					<span>Admission Status Pending</span>
 				</label>
@@ -678,7 +690,7 @@ break;
 				
 				<label for="alumni_department">Department</label>
 				<span id="alumni-department-menu">
-					<?php if(!empty($comajor_department_id)){
+					<?php if(!empty($department_id)){
 						echo get_department_dropdown($college_id, "alumni");
 				    } else { ?>
 					<select name="alumni_department" id="alumni-department">
@@ -687,7 +699,7 @@ break;
 					<?php }?>
 				</span>
 				
-				<label for="alumni_comajor">
+				<label for="alumni_comajor" class="checkbox">
 					<input type="checkbox" name="alumni_comajor" id="alumni-comajor" value="yes">
 					<span>Earned Co-major</span>
 				</label>
@@ -784,22 +796,47 @@ break;
 			</fieldset>
 			
 			
-			<input type="submit" value="Save Changes" class="submit" id="profile-submit" />
+			<input type="submit" value="Save Changes" id="profile-submit" class="submit btn btn-primary" />
 			
 		</form>
+	</div>
 </body>
 </html>
 
 <?php 
-// end of check for user id
-} else {
+	} 
+	// The user did not have sufficient priveleges to edit this profile
+	else {
+	?>
+		<!DOCTYPE html>
+		<head>
+			<?php echo get_head_meta("Edit Profile"); ?>
+		</head>
+		<body>
+			<?php include ROOT.'/constants/navbar.php'; ?>
+			<div class="container">
+				<p class="alert
+ no-data">You do not have permission to edit this profile.</p>
+			</div>
+		</body>
+		</html>
+	<?php
+	}
+	
+} 
+// Could not find the listed profile.
+else {
 ?>
 	<!DOCTYPE html>
 	<head>
-		<?php echo get_head_meta("Edit person"); ?>
+		<?php echo get_head_meta("Edit Profile"); ?>
 	</head>
 	<body>
-		<p>Could not find profile!</p>
+		<?php include ROOT.'/constants/navbar.php'; ?>
+		<div class="container">
+			<p class="alert
+ no-data">Sorry, we couldn't find this profile.</p>
+		</div>
 	</body>
 	</html>
 <?php

@@ -48,15 +48,17 @@ $departments =	array( 	array ('Agricultural and Biosystems Engineering', 'Agricu
   *
   * Students and alumni are a part of programs.  For example a program may be 
   * Bachelor's of Science, Certificate, or Post-Doc.
-  * Each array includes the name of the program, an abbreviation and 
-  * whether it is conducted online (0 is no, 1 is yes).
+  * Each array includes the name of the program, an abbreviation, 
+  * whether it is conducted online (0 is no, 1 is yes), and whether it is a 
+  * student or researcher program (for example, you may not have an academic 
+  * program for undergrads but they may be able to do research).
   */
-$programs = 	array( 	array ('Undergraduate', '', 0),
-						array ('Certificate', '', 1),
-						array ('On-campus MS', 'MS', 0),
-						array ('On-line MS', 'MS', 1),
-						array ('PhD', 'PhD', 0),
-						array ('Post-Doc', '', 0));
+$programs = 	array( 	array ('Undergraduate', '', 0, 'researcher'),
+						array ('Certificate', '', 1, 'student'),
+						array ('Master\'\'s', 'MS', 0, 'student'),
+						array ('Master\'\'s', 'MS', 1, 'student'),
+						array ('PhD', 'PhD', 0, 'student'),
+						array ('Post-Doc', '', 0, 'student'));
 						
 /** Groups in your program.
   *

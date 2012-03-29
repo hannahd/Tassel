@@ -21,27 +21,29 @@ define('DB_PASSWORD', 'root');
 /** MySQL hostname */
 define('DB_HOST', 'localhost');
 
+define('TBL_PREFIX', 'tassel_');
+
 /** Table Names */
-define('TBL_PROFILE_GROUP_MAP', 'map_profile_group');
-define('TBL_PROFILE_INTEREST_MAP', 'map_profile_interest');
-define('TBL_PROFILE_LINK_MAP', 'map_profile_link');
-define('TBL_PROFILE_PROFILE_MAP', 'map_profile_profile');
-define('TBL_ALUMNI', 'alumni');
-define('TBL_FACULTY', 'faculty');
-define('TBL_STAFF', 'staff');
-define('TBL_STUDENT', 'student');
-define('TBL_VISITOR', 'visitor');
-define('TBL_DEPARTMENT', 'department');
-define('TBL_COLLEGE', 'college');
-define('TBL_COUNTRY', 'country');
-define('TBL_GROUP', 'group');
-define('TBL_INTEREST', 'interest');
-define('TBL_LINK', 'link');
-define('TBL_PROFILE', 'profile');
-define('TBL_PROGRAM', 'program');
-define('TBL_RELATIONSHIP', 'relationship');
-define('TBL_UPDATE', 'update');
-define('TBL_US_STATE', 'us_state');
+define('TBL_PROFILE_GROUP_MAP', TBL_PREFIX.'map_profile_group');
+define('TBL_PROFILE_INTEREST_MAP', TBL_PREFIX.'map_profile_interest');
+define('TBL_PROFILE_LINK_MAP', TBL_PREFIX.'map_profile_link');
+define('TBL_PROFILE_PROFILE_MAP', TBL_PREFIX.'map_profile_profile');
+define('TBL_ALUMNI', TBL_PREFIX.'alumni');
+define('TBL_FACULTY', TBL_PREFIX.'faculty');
+define('TBL_STAFF', TBL_PREFIX.'staff');
+define('TBL_STUDENT', TBL_PREFIX.'student');
+define('TBL_VISITOR', TBL_PREFIX.'visitor');
+define('TBL_DEPARTMENT', TBL_PREFIX.'department');
+define('TBL_COLLEGE', TBL_PREFIX.'college');
+define('TBL_COUNTRY', TBL_PREFIX.'country');
+define('TBL_GROUP', TBL_PREFIX.'group');
+define('TBL_INTEREST', TBL_PREFIX.'interest');
+define('TBL_LINK', TBL_PREFIX.'link');
+define('TBL_PROFILE', TBL_PREFIX.'profile');
+define('TBL_PROGRAM', TBL_PREFIX.'program');
+define('TBL_RELATIONSHIP', TBL_PREFIX.'relationship');
+define('TBL_UPDATE', TBL_PREFIX.'update');
+define('TBL_US_STATE', TBL_PREFIX.'us_state');
 
 
 /* Constants
@@ -52,6 +54,9 @@ define ("PROG_START_YEAR", 2004);
 
 /** This year. Don't change this. */
 define ("CUR_YEAR", date('Y'));
+
+/** Email that automated emails should come from. */
+define ("GLOBAL_EMAIL", "hjhunt11@gmail.com");
 
 /**
  * Authentication Unique Keys and Salts.
@@ -71,8 +76,8 @@ if($debug){ error_reporting(E_ALL | E_STRICT);}
 /**
  * Absolute Paths to Tassel Files.
  */
-define ("BASE", "http://".$_SERVER['HTTP_HOST']."/Tassel/Tassel");
-define ("ROOT", $_SERVER['DOCUMENT_ROOT']."/Tassel/Tassel");
+define ("BASE", "http://".$_SERVER['HTTP_HOST']."/HW9_hjhunt_7957");
+define ("ROOT", $_SERVER['DOCUMENT_ROOT']."/HW9_hjhunt_7957");
 
 
 /**

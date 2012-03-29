@@ -15,6 +15,7 @@
 // TODO: Make all errors appear first round (instead of profile errors then position errors)
 // TODO: Remove username, have users log in with email and password
 // TODO: Auto generate password & email it to user
+// TODO: Normalize format on phone num
 
 require_once ("constants.php");
 require_once (ROOT."/constants/dbconnect.php"); //Includes database connection details
@@ -39,7 +40,7 @@ function set_faculty($profile_qry, $data, $action){
 		$start_date = sanitize($data['faculty_start_y']) . "-" . sanitize($data['faculty_start_m']) . "-01";
 	
 		// Validate the title
-		$result = validate_input($title, "Title", true, "", 220);
+		$result = validate_input($title, "Title", true, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the phone number
@@ -47,7 +48,7 @@ function set_faculty($profile_qry, $data, $action){
 		$errors = array_merge($errors, $result);
 		
 		// Validate the office location
-		$result = validate_input($office_location, "Office", false, "", 220);
+		$result = validate_input($office_location, "Office", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the start date
@@ -70,8 +71,12 @@ function set_faculty($profile_qry, $data, $action){
 					(`profile_id`, `title`, `department_id`, `phone`, `office_location`, `education`, `bio`, `start_date`) 
 					VALUES ('$profile_id', '$title', '$department_id', '$phone', '$office_location', '$education', '$bio', '$start_date')") 
 					or die(error_message("The profile could not be created", mysql_error(), 24));
-			
-				echo '<p class="success message">Profile created!</p>';
+				
+				if($data["enabled"]){
+					echo '<p class="success alert">Profile created!</p>';
+				} else {
+					echo '<p class="success alert">Your profile was submitted. An admin will review it and it will be up on the site shortly.</p>';
+				}
 			} elseif ($action === "update"){
 				
 				set_profile($profile_qry, "update");
@@ -79,12 +84,12 @@ function set_faculty($profile_qry, $data, $action){
 				
 				$update_faculty = mysql_query("UPDATE ". TBL_FACULTY ." SET title='$title', department_id='$department_id', phone='$phone', office_location='$office_location', education='$education', bio='$bio', start_date='$start_date' WHERE profile_id='$profile_id'") or die(error_message("The visitor profile could not be updated", mysql_error(), "22b"));;
 				
-				echo '<p class="success message">Profile updated!</p>';
+				echo '<p class="success alert">Profile updated!</p>';
 			}
 			 
 		} else {
 			// Print errors
-			echo '<ul class="error message"><span style="font-style:normal;">Please correct the following:</span>';
+			echo '<ul class="error alert"><span>Please correct the following:</span>';
 			foreach($errors as $e) {
 				echo "<li>".$e ."</li>";
 			}
@@ -93,7 +98,7 @@ function set_faculty($profile_qry, $data, $action){
 		
 	} else {
 		// If all the necessary data wasn't present
-		echo '<p class="error message">There was a problem with your request. Please contact an admin.</p>';
+		echo '<p class="error alert">There was a problem with your request. Please contact an admin.</p>';
 	}
 }
 
@@ -110,7 +115,7 @@ function set_staff($profile_qry, $data, $action){
 		$start_date = sanitize($data['staff_start_y']) . "-" . sanitize($data['staff_start_m']) . "-01";
 	
 		// Validate the title
-		$result = validate_input($title, "Title", true, "", 220);
+		$result = validate_input($title, "Title", true, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the phone number
@@ -118,7 +123,7 @@ function set_staff($profile_qry, $data, $action){
 		$errors = array_merge($errors, $result);
 		
 		// Validate the office location
-		$result = validate_input($office_location, "Office", false, "", 220);
+		$result = validate_input($office_location, "Office", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the start date
@@ -139,7 +144,11 @@ function set_staff($profile_qry, $data, $action){
 					VALUES ('$profile_id', '$title', '$phone', '$office_location', '$bio', '$start_date')") 
 					or die(error_message("The staff profile could not be created", mysql_error(), 26));
 			 
-				echo '<p class="success message">Profile created!</p>';
+				if($data["enabled"]){
+					echo '<p class="success alert">Profile created!</p>';
+				} else {
+					echo '<p class="success alert">Your profile was submitted. An admin will review it and it will be up on the site shortly.</p>';
+				}
 			} elseif ($action === "update"){
 
 				set_profile($profile_qry, "update");
@@ -147,12 +156,12 @@ function set_staff($profile_qry, $data, $action){
 
 				$update_staff = mysql_query("UPDATE ". TBL_STAFF ." SET title='$title', phone='$phone', office_location='$office_location', bio='$bio', start_date='$start_date' WHERE profile_id='$profile_id'") or die(error_message("The staff profile could not be updated", mysql_error(), "22b"));;
 
-				echo '<p class="success message">Profile updated!</p>';
+				echo '<p class="success alert">Profile update!</p>';
 			}
 			
 		} else {
 			// Print errors
-			echo '<ul class="error message"><span style="font-style:normal;">Please correct the following:</span>';
+			echo '<ul class="error alert"><span>Please correct the following:</span>';
 			foreach($errors as $e) {
 				echo "<li>".$e ."</li>";
 			}
@@ -161,7 +170,7 @@ function set_staff($profile_qry, $data, $action){
 		
 	} else {
 		// If all the necessary data wasn't present
-		echo '<p class="error message">There was a problem with your request. Please contact an admin.</p>';
+		echo '<p class="error alert">There was a problem with your request. Please contact an admin.</p>';
 	}
 }
 
@@ -206,11 +215,11 @@ function set_student($profile_qry, $data, $action){
 		$errors = array_merge($errors, $result);
 		
 		// Validate the office location
-		$result = validate_input($office_location, "Office Location", false, "", 220);
+		$result = validate_input($office_location, "Office Location", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the city
-		$result = validate_input($home_city, "City", false, "", 220);
+		$result = validate_input($home_city, "City", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the state
@@ -222,11 +231,11 @@ function set_student($profile_qry, $data, $action){
 		$errors = array_merge($errors, $result);
 		
 		// Validate the title
-		$result = validate_input($title, "Title", false, "", 220);
+		$result = validate_input($title, "Title", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the company
-		$result = validate_input($company, "Company", false, "", 220);
+		$result = validate_input($company, "Company", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the start date
@@ -279,7 +288,11 @@ function set_student($profile_qry, $data, $action){
 				}
 			
 			
-				echo '<p class="success message">Profile created!</p>';
+				if($data["enabled"]){
+					echo '<p class="success alert">Profile created!</p>';
+				} else {
+					echo '<p class="success alert">Your profile was submitted. An admin will review it and it will be up on the site shortly.</p>';
+				}
 			 } elseif ($action === "update"){
 
 					set_profile($profile_qry, "update");
@@ -295,11 +308,12 @@ function set_student($profile_qry, $data, $action){
 						$update_student = mysql_query("UPDATE ". TBL_STUDENT ." SET state_id='$state_id' WHERE profile_id='$profile_id'") or die(error_message("The student profile could not be updated", mysql_error(), "22b"));;
 					}
 					
-					echo '<p class="success message">Profile updated!</p>';
+					echo '<p class="success alert">Profile updated!</p>';
+					
 			}
 		} else {
 			// Print errors
-			echo '<ul class="error message"><span style="font-style:normal;">Please correct the following:</span>';
+			echo '<ul class="error alert"><span>Please correct the following:</span>';
 			foreach($errors as $e) {
 				echo "<li>".$e ."</li>";
 			}
@@ -308,7 +322,7 @@ function set_student($profile_qry, $data, $action){
 		
 	} else {
 		// If all the necessary data wasn't present
-		echo '<p class="error message">There was a problem with your request. Please contact an admin.</p>';
+		echo '<p class="error alert">There was a problem with your request. Please contact an admin.</p>';
 	}
 }
 
@@ -346,11 +360,11 @@ function set_alumni($profile_qry,  $data, $action){
 		$errors = array_merge($errors, $result);
 		
 		// Validate the title
-		$result = validate_input($dissertation_title, "Dissertation Title", false, "", 220);
+		$result = validate_input($dissertation_title, "Dissertation Title", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the city
-		$result = validate_input($company_city, "City", false, "", 220);
+		$result = validate_input($company_city, "City", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the state
@@ -362,11 +376,11 @@ function set_alumni($profile_qry,  $data, $action){
 		$errors = array_merge($errors, $result);
 		
 		// Validate the title
-		$result = validate_input($title, "Title", false, "", 220);
+		$result = validate_input($title, "Title", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the company
-		$result = validate_input($company, "Company", false, "", 220);
+		$result = validate_input($company, "Company", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the start date
@@ -418,9 +432,11 @@ function set_alumni($profile_qry,  $data, $action){
 							or die(error_message("The profile could not be created", mysql_error(), "28d"));
 					}
 				}
-			
-			
-				echo '<p class="success message">Profile created!</p>';
+				if($data["enabled"]){
+					echo '<p class="success alert">Profile created!</p>';
+				} else {
+					echo '<p class="success alert">Your profile was submitted. An admin will review it and it will be up on the site shortly.</p>';
+				}
 			} elseif ($action === "update"){
 
 				set_profile($profile_qry, "update");
@@ -435,13 +451,13 @@ function set_alumni($profile_qry,  $data, $action){
 				if(!empty($state_id)){
 					$update_alumni = mysql_query("UPDATE ". TBL_ALUMNI ." SET state_id='$state_id' WHERE profile_id='$profile_id'") or die(error_message("The student profile could not be updated", mysql_error(), "22b"));;
 				}
-
-				echo '<p class="success message">Profile updated!</p>';
+				
+				echo '<p class="success alert">Profile updated!</p>';
 			}
 			
 		} else {
 			// Print errors
-			echo '<ul class="error message"><span style="font-style:normal;">Please correct the following:</span>';
+			echo '<ul class="error alert"><span>Please correct the following:</span>';
 			foreach($errors as $e) {
 				echo "<li>".$e ."</li>";
 			}
@@ -450,7 +466,7 @@ function set_alumni($profile_qry,  $data, $action){
 		
 	} else {
 		// If all the necessary data wasn't present
-		echo '<p class="error message">There was a problem with your request. Please contact an admin.</p>';
+		echo '<p class="error alert">There was a problem with your request. Please contact an admin.</p>';
 	}
 }
 
@@ -469,7 +485,7 @@ function set_visitor($profile_qry, $data, $action){
 		$start_date = sanitize($data['visitor_start_y']) . "-" . sanitize($data['visitor_start_m']) . "-01";
 	
 		// Validate the title
-		$result = validate_input($title, "Title", true, "", 220);
+		$result = validate_input($title, "Title", true, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the phone number
@@ -477,7 +493,7 @@ function set_visitor($profile_qry, $data, $action){
 		$errors = array_merge($errors, $result);
 		
 		// Validate the office location
-		$result = validate_input($office_location, "Office", false, "", 220);
+		$result = validate_input($office_location, "Office", false, "name", 220);
 		$errors = array_merge($errors, $result);
 		
 		// Validate the start date
@@ -512,7 +528,11 @@ function set_visitor($profile_qry, $data, $action){
 						or die(error_message("The profile could not be created", mysql_error(), 29));
 				}
 			
-				echo '<p class="success message">Profile created!</p>';
+				if($data["enabled"]){
+					echo '<p class="success alert">Profile created!</p>';
+				} else {
+					echo '<p class="success alert">Your profile was submitted. An admin will review it and it will be up on the site shortly.</p>';
+				}
 			} elseif ($action === "update"){
 				
 				set_profile($profile_qry, "update");
@@ -524,12 +544,12 @@ function set_visitor($profile_qry, $data, $action){
 					$update_visitor = mysql_query("UPDATE ". TBL_VISITOR ." SET department_id='$department_id' WHERE profile_id='$profile_id'") or die(error_message("The visitor profile could not be updated", mysql_error(), "22b"));;
 				}
 				
-				echo '<p class="success message">Profile updated!</p>';
+				echo '<p class="success alert">Profile updated!</p>';
 			}	
 			
 		} else {
 			// Print errors
-			echo '<ul class="error message"><span style="font-style:normal;">Please correct the following:</span>';
+			echo '<ul class="error alert"><span>Please correct the following:</span>';
 			foreach($errors as $e) {
 				echo "<li>".$e ."</li>";
 			}
@@ -538,7 +558,7 @@ function set_visitor($profile_qry, $data, $action){
 		
 	} else {
 		// If all the necessary data wasn't present
-		echo '<p class="error message">There was a problem with your request. Please contact an admin.</p>';
+		echo '<p class="error alert">There was a problem with your request. Please contact an admin.</p>';
 	}
 }
 
@@ -572,7 +592,6 @@ function set_profile($qry, $action){
 if($_POST && isset($_GET['action'])) {
 	if( $_GET['action'] == "add" || $_GET['action'] == "update" ) {
 		$errors = array(); 
-		
 		// Check that all the necessary data is present
 		if(isset($_POST['username']) && isset($_POST['password']) && isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['email']) && isset($_POST['user_level']) && isset($_POST['position']) && isset($_POST['photo'])) {
 			$username = sanitize($_POST['username']);
@@ -585,6 +604,13 @@ if($_POST && isset($_GET['action'])) {
 			$position = sanitize($_POST['position']);
 			$ip_address = $_SERVER['REMOTE_ADDR'];
 			$activation_code = rand(1000,9999);
+			
+			if(!isset($_POST['enabled'])){
+				$enabled = 1;
+			} else {
+				$enabled = $_POST['enabled'];
+			}
+			
 			
 			if(isset($_POST['id'])){
 				$id = $_POST['id'];
@@ -612,11 +638,11 @@ if($_POST && isset($_GET['action'])) {
 			}
 		
 			// Validate the first name
-			$result = validate_input($first_name, "First Name", true, "alphanum", 220, 2);
+			$result = validate_input($first_name, "First Name", true, "name", 220, 2);
 			$errors = array_merge($errors, $result);
 		
 			// Validate the last name
-			$result = validate_input($last_name, "Last Name", true, "alphanum", 220, 2);
+			$result = validate_input($last_name, "Last Name", true, "name", 220, 2);
 			$errors = array_merge($errors, $result);
 		
 			// Validate the photo
@@ -643,8 +669,8 @@ if($_POST && isset($_GET['action'])) {
 				
 					// Create profile query
 					$add_profile_qry = "INSERT INTO ". TBL_PROFILE ." 
-						(`username`, `password`, `email`, `first_name`, `last_name`, `user_level`, `photo`, `position`, `date_created`, `ip_address`, `activation_code`) 
-						VALUES ('$username', '$password', AES_ENCRYPT('$email', '". SALT ."'), '$first_name', '$last_name', '$user_level', '$photo', '$position', now(), '$ip_address', '$activation_code')"; 
+						(`username`, `password`, `email`, `first_name`, `last_name`,  `user_level`, `photo`, `enabled`, `position`, `date_created`, `ip_address`, `activation_code`) 
+						VALUES ('$username', '$password', AES_ENCRYPT('$email', '". SALT ."'), '$first_name', '$last_name', '$user_level', '$photo', '$enabled', '$position', now(), '$ip_address', '$activation_code')"; 
 				
 				
 				
@@ -704,7 +730,7 @@ if($_POST && isset($_GET['action'])) {
 			
 			} else {
 				// Print errors
-				echo '<ul class="error message"><span style="font-style:normal;">Please correct the following:</span>';
+				echo '<ul class="error alert"><span>Please correct the following:</span>';
 				foreach($errors as $e) {
 					echo "<li>".$e ."</li>";
 				}
@@ -715,7 +741,7 @@ if($_POST && isset($_GET['action'])) {
 			if($debug){ 
 				print_r($_POST);
 			}
-			echo '<p class="error message">There was a problem with your request. Please contact an admin.</p>';
+			echo '<p class="error alert">There was a problem with your request. Please contact an admin.</p>';
 
 		}
 	} elseif(isset($_GET['action']) && $_GET['action'] == "update_departments") {
@@ -724,8 +750,311 @@ if($_POST && isset($_GET['action'])) {
 			echo get_department_dropdown($_POST['college_id'], $_POST['position']);
 		} else {
 			// If all the necessary data wasn't present
-			echo '<p class="error message">There was a problem with your request. Please contact an admin.</p>';
+			echo '<p class="error alert">There was a problem with your request. Please contact an admin.</p>';
 		}
 		
 	}
+}
+
+if($_POST && $_GET['action'] == "alert"){
+	$errors = array();
+	
+	$from_name = sanitize($_POST['from_name']);
+	$from_email = sanitize($_POST['from_email']);
+	$to_email = sanitize($_POST['to_email']);
+	$content = sanitize($_POST['content']);
+	
+	$result = validate_input($from_name, "Your Name", true, "name");
+	$errors = array_merge($errors, $result);
+	
+	$result = validate_input($from_email, "Your Email", true, "email");
+	$errors = array_merge($errors, $result);
+	
+	$result = validate_input($to_email, "Profile Email", true, "email");
+	$errors = array_merge($errors, $result);
+	
+	$result = validate_input($content, "Your Message", true, "");
+	$errors = array_merge($errors, $result);
+	
+	// Check if there were errors
+	if (count($errors) == 0){
+		
+		//Build the message
+		$subject = "New Message from " . $from_name;
+
+		$message = "<p>You have a new message from ". $from_name ." (<a href=\"mailto:".$from_email."\">". $from_email ."</a>):</p>";
+		$message .= "<hr />". $content;
+		$message .= "<hr /><p><small>Sent to ".$to_email. " from <a href=\"".BASE."\">".BASE."</a></small></p>";
+
+		// Send message to GLOBAL_EMAIL for debugging purposes even though this would
+		// end up being sent to $to_email
+		send_msg(GLOBAL_EMAIL, $subject, $message);
+		
+		echo '<p class="success alert">Message sent!</p>';
+		
+	} else {
+		// Print errors
+		echo '<ul class="error alert"><span>Please correct the following:</span>';
+		foreach($errors as $e) {
+			echo "<li>".$e ."</li>";
+		}
+		echo '</ul>';
+	}
+}
+
+if($_GET['action'] == "get" ){
+	//TODO: Add filters & search
+	
+	$profiles = mysql_query("SELECT *, AES_DECRYPT(email, '". SALT ."') AS user_email FROM ".TBL_PROFILE ." ORDER BY last_name ASC");
+	
+	if(mysql_num_rows($profiles) == 0)
+	{
+		echo "<p class=\"alert
+ no-data\">Sorry, there are no people in this directory.</p>";
+	}
+	else
+	{ 
+		// echo "<pre>";
+		// 		print_r($staff);
+		// 		echo "</pre>";
+		
+		// Build profile entry
+		while($row = mysql_fetch_assoc($profiles))
+		{
+			
+			// Only display enabled profile
+			if($row['enabled']){
+				
+				echo '<div class="profile" id="profile-'. $row['id'] .'">';
+				
+				// Set details based on position
+				$row_details = NULL;
+				switch ($row['position']) {
+					case "student":
+						$detail_qry = mysql_query("SELECT * FROM ". TBL_STUDENT ." WHERE profile_id=".$row['id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+						$row_details = mysql_fetch_assoc($detail_qry);
+						break;
+					case "alumni":
+						$detail_qry = mysql_query("SELECT * FROM ". TBL_ALUMNI ." WHERE profile_id=".$row['id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+						$row_details = mysql_fetch_assoc($detail_qry);
+						break;
+					case "faculty":
+						$detail_qry = mysql_query("SELECT * FROM ". TBL_FACULTY ." WHERE profile_id=".$row['id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+						$row_details = mysql_fetch_assoc($detail_qry);
+						break;
+					case "staff":
+						$detail_qry = mysql_query("SELECT * FROM ". TBL_STAFF ." WHERE profile_id=".$row['id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+						$row_details = mysql_fetch_assoc($detail_qry);
+						break;
+					case "visitor":
+						$detail_qry = mysql_query("SELECT * FROM ". TBL_VISITOR ." WHERE profile_id=".$row['id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+						$row_details = mysql_fetch_assoc($detail_qry);
+						break;
+				}	
+				
+				// Check if there is a photo
+				if(empty($row['photo'])){
+					// Add empty photo
+					echo '<img src="'. BASE .'/images/clear.gif" class="blank"/> ';
+				} else {
+					// Add profile photo
+					echo '<img src="'. $row['photo'] .'"/>';
+				}
+			
+				echo '<div class="profile-content">';
+			
+				// Add First and Last Name
+				echo '<h3>'.$row['first_name'].' '.$row['last_name'].'</h3>';
+			
+				// Add Title
+				if(!empty($row_details)){
+					switch ($row['position']) {
+						case "student":
+							// Add program title & role (i.e. Undergraduate Researcher)
+							$program_qry = mysql_query("SELECT name, role FROM ". TBL_PROGRAM ." WHERE id=".$row_details['program_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+							$program = mysql_fetch_assoc($program_qry);
+							echo '<h4>'. ucfirst($program['name']).' '. ucfirst($program['role']);
+							
+							// Add department
+							$department_qry = mysql_query("SELECT name FROM ". TBL_DEPARTMENT ." WHERE id=".$row_details['department_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+							$department = mysql_fetch_assoc($department_qry);
+							
+							echo ', '. ucfirst($department['name']);
+							
+							// Add comajor (if it exists)
+							if(!empty($row_details['comajor_department_id'])){
+								echo '<br/>';
+								$department_qry = mysql_query("SELECT name FROM ". TBL_DEPARTMENT ." WHERE id=".$row_details['comajor_department_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+								$department = mysql_fetch_assoc($department_qry);
+								
+								// TODO: Make different degrees possible with comajor
+
+								echo ucfirst($program['name']).' '. ucfirst($program['role']) . ', '. ucfirst($department['name']);
+							}
+							
+							// Add title and company details (if it exists)
+							if(!empty($row_details['title']) && !empty($row_details['company'])){
+								echo '<br/>';
+								
+								echo ucfirst(html_entity_decode($row_details['title'])).', '. ucfirst(html_entity_decode($row_details['company']));
+								
+								// Add city, state, country details (if they exist)
+								if(!empty($row_details['home_city'])){
+									echo ' (' . ucfirst($row_details['home_city']);
+									if(!empty($row_details['state_id'])){
+										$state_qry = mysql_query("SELECT name FROM ". TBL_US_STATE ." WHERE id=".$row_details['state_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+										$state = mysql_fetch_assoc($state_qry);
+										
+										echo ', '. ucfirst($state['name']);
+									} elseif (!empty($row_details['country_id'])){
+										$country_qry = mysql_query("SELECT name FROM ". TBL_COUNTRY ." WHERE id=".$row_details['country_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+										$country = mysql_fetch_assoc($country_qry);
+										
+										echo ', '. ucfirst($country['name']);
+									}
+									echo ')';
+								}
+							}
+							 
+							echo '</h4>';
+							break;
+						case "alumni":
+							echo '<h4>';
+							// Add title and company details (if it exists)
+							if(!empty($row_details['title']) && !empty($row_details['company'])){
+								echo ucfirst(html_entity_decode($row_details['title'])).', '. ucfirst(html_entity_decode($row_details['company']));
+								
+								// Add city, state, country details (if they exist)
+								if(!empty($row_details['company_city'])){
+									echo ' (' . ucfirst(html_entity_decode($row_details['company_city']));
+									if(!empty($row_details['state_id'])){
+										$state_qry = mysql_query("SELECT name FROM ". TBL_US_STATE ." WHERE id=".$row_details['state_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+										$state = mysql_fetch_assoc($state_qry);
+										
+										echo ', '. ucfirst($state['name']);
+									} elseif (!empty($row_details['country_id'])){
+										$country_qry = mysql_query("SELECT name FROM ". TBL_COUNTRY ." WHERE id=".$row_details['country_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+										$country = mysql_fetch_assoc($country_qry);
+										
+										echo ', '. ucfirst($country['name']);
+									}
+									echo ')';
+								}
+								echo '<br/>';
+							}
+							
+							// Add program title & role (i.e. Undergraduate Researcher)
+							$program_qry = mysql_query("SELECT name, abbreviation FROM ". TBL_PROGRAM ." WHERE id=".$row_details['program_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+							$program = mysql_fetch_assoc($program_qry);
+							
+							echo "Alum, ";
+							
+							if(!empty($program['abbreviation'])){
+								echo ucfirst($program['abbreviation']).', ';
+							} else {
+								echo ucfirst($program['name']).', ';
+							}
+							
+							// Add department
+							$department_qry = mysql_query("SELECT name FROM ". TBL_DEPARTMENT ." WHERE id=".$row_details['department_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+							$department = mysql_fetch_assoc($department_qry);
+							
+							echo ucfirst($department['name']);
+							
+							// Add graduation term and year
+							echo ' (';
+							$grad_date = explode("-", $row_details['grad_date']);
+							
+							// Get grad term
+							echo month_to_season($grad_date[1]);
+							
+							echo $grad_date[0] . ')';
+							 
+							echo '</h4>';
+							break;
+						case "faculty":
+							echo '<h4>';
+							// Add title
+							echo ucfirst(html_entity_decode($row_details['title'])).', ';
+								
+							// Add department
+							$department_qry = mysql_query("SELECT name FROM ". TBL_DEPARTMENT ." WHERE id=".$row_details['department_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+							$department = mysql_fetch_assoc($department_qry);
+							
+							echo ucfirst($department['name']);
+							
+							echo '</h4>';
+							break;
+						case "staff":
+							// Add title
+							echo '<h4>'. ucfirst(html_entity_decode($row_details['title'])) .'</h4>';
+							break;
+						case "visitor":
+							// Add title
+							echo '<h4>'. ucfirst(html_entity_decode($row_details['title']));
+								
+							// Add department (if one exists)
+							if(!empty($row_details['department_id'])){
+								$department_qry = mysql_query("SELECT name FROM ". TBL_DEPARTMENT ." WHERE id=".$row_details['department_id']. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+								$department = mysql_fetch_assoc($department_qry);
+							
+								echo ', '. ucfirst($department['name']);
+							}
+							echo '</h4>';
+							break;
+					}
+				}
+				
+				
+				// Add Contact Information
+				echo '<span class="contact-info"><h6>Email:</h6> <a href="mailto:'. $row['user_email'] . '">'. $row['user_email'] .'</a></span>';
+				if(!empty($row_details['phone'])){
+					echo '<span class="contact-info"><h6>Phone:</h6> <a href="tel:'. $row_details['phone'] . '" class="phone">'. $row_details['phone'] .'</a></span>';
+				}
+				if(!empty($row_details['office_location'])){
+					echo '<span class="contact-info"><h6>Office:</h6> '. $row_details['office_location'].'</span>';
+				}
+				
+				// Add collapsable details
+				//echo '<a href="#" class="button" id="'.$row['id'].'">+ more</a>'; 
+				echo '<div class="expand-profile" id="expand-profile-'. $row['id'] .'">';
+				
+				// TODO: Related People
+				
+				// Add Expected Graduation (for students)
+				if($row['position']=== 'student' && !empty($row_details['grad_date'])){
+					$grad_date = explode("-", $row_details['grad_date']);
+					
+					echo '<h6>Expected Graduation:</h6><p>';
+					echo month_to_season($grad_date[1]);
+					echo $grad_date[0].'</p>';
+				}
+				
+				// Add Expected Graduation (for students)
+				if($row['position']=== 'alumni' && !empty($row_details['dissertation_title'])){
+					echo '<h6>Dissertation Title:</h6><p>'. html_entity_decode($row_details['dissertation_title']) . '</p>';
+				}
+				
+				// Add Education
+				if(!empty($row_details['education'])){
+					echo '<h6>Education:</h6> <p class="profile-education">'. html_entity_decode(nl2br($row_details['education'])) .'</p>';
+				}
+				
+				// Add Bio
+				if(!empty($row_details['bio'])){
+					echo '<p class="profile-bio">'. html_entity_decode(nl2br($row_details['bio'])) .'</p>';
+				}
+				
+				// TODO: Interests
+				// TODO: Groups
+				// TODO: Links
+				
+				echo '<small class="update">Last updated <span>'. contextualTime(strtotime($row_details['last_update'])) .'</span>.</small>';	
+				
+				echo '</div></div></div>';
+			}
+		}
+		//echo "</tbody></table>";
+	}
+	
 }

@@ -38,6 +38,11 @@
 				$errors[] = 'Please enter a valid '.$name.'.';
 			} elseif($format === "date" && !valid_date($input)) {
 				$errors[] = 'Please enter a valid '.$name.'.';
+			} elseif($format === "name" ){
+				$invalid_char = valid_name($input);
+				if (!($invalid_char===TRUE)){
+					$errors[] = $name.' can not include' .$invalid_char. '.';
+				}
 			}
 			
 		}
@@ -68,9 +73,20 @@
 	    return (preg_match('/\(?\d{3}\)?[-\s.]?\d{3}[-\s.]\d{4}/x', $phone)) ? TRUE : FALSE;
 	}
 	
+	/** Checks that do not contain invalid characters. */
+	function valid_name($string) {
+		$invalid_char = array('{','}','\\','/','(',')',';','<','>','*','$','%','@','?','^','!','+','=','[',']','`', '~');
+		foreach($invalid_char as $c){
+			if(!(strpos($string, $c)===FALSE)){
+				return $c;
+			}
+		}
+		return TRUE;
+	}
+	
 	/** Checks that a string only contains alpha numeric values or underscores. */
 	function valid_alphanum($string) {
-	    return (preg_match('/^[a-z\d_]{2,220}$/i', $string)) ? TRUE : FALSE;
+	    return (preg_match('/^[a-z\d_ ]{2,220}$/i', $string)) ? TRUE : FALSE;
 	}
 	
 	/** Checks that the position is unknown, faculty, staff, student, alumni, or visitor. */
