@@ -13,38 +13,45 @@
 	function validate_input($input, $name, $is_required, $format, $max_char = -1, $min_char = -1) {
 		$errors = array();
 		
-		// Check if a required field is empty
-		if($is_required && empty($input)) {
-			$errors[] = $name .' is required.';
-		} elseif(!empty($input)){
-			// Checks length and format of non-empty fields
-			if($min_char > 0 && strlen($input) < $min_char) {
-				$errors[] = $name.' must be at least '. $min_char . ' characters.';
-			} elseif($max_char > 0 && strlen($input) > $max_char) {
-				$errors[] = $name.' can be no more than '.$max_char.' characters.';
-			} elseif($format === "alphanum" && !valid_alphanum($input)) {
-				$errors[] = $name.' can only include alpha-numeric characters (a-z, A-Z, 0-9) and underscores.';
-			} elseif($format === "email" && !valid_email($input)) {
-				$errors[] = 'Please enter a valid email address (ex. "joe@shmo.com").';
-			} elseif($format === "url" && !valid_url($input)) {
-				$errors[] = 'Please enter a valid link (ex. "http://www.google.com").';
-			} elseif($format === "phone" && !valid_phone($input)) {
-				$errors[] = 'Please enter a valid phone number. (ex. "515-515-5151")';
-			} elseif($format === "position" && !valid_position($input)) {
-				$errors[] = 'Please select a valid position.';
-			} elseif($format === "bool" && !filter_var($input, FILTER_VALIDATE_BOOLEAN)) {
-				$errors[] = 'Please enter a valid '.$name.'.';
-			} elseif($format === "num" && !is_numeric($input)) {
-				$errors[] = 'Please enter a valid '.$name.'.';
-			} elseif($format === "date" && !valid_date($input)) {
-				$errors[] = 'Please enter a valid '.$name.'.';
-			} elseif($format === "name" ){
-				$invalid_char = valid_name($input);
-				if (!($invalid_char===TRUE)){
-					$errors[] = $name.' can not include' .$invalid_char. '.';
+		if (is_array($input)) {
+			// Recursively validate each item in the array
+	        foreach($input as $var=>$val) {
+	            $errors[$var] = validate_input($val, $name, $is_required, $format, $max_char = -1, $min_char = -1);
+	        }
+	    } else {
+			// Check if a required field is empty
+			if($is_required && empty($input)) {
+				$errors[] = $name .' is required.';
+			} elseif(!empty($input)){
+				// Checks length and format of non-empty fields
+				if($min_char > 0 && strlen($input) < $min_char) {
+					$errors[] = $name.' must be at least '. $min_char . ' characters.';
+				} elseif($max_char > 0 && strlen($input) > $max_char) {
+					$errors[] = $name.' can be no more than '.$max_char.' characters.';
+				} elseif($format === "alphanum" && !valid_alphanum($input)) {
+					$errors[] = $name.' can only include alpha-numeric characters (a-z, A-Z, 0-9) and underscores.';
+				} elseif($format === "email" && !valid_email($input)) {
+					$errors[] = 'Please enter a valid email address (ex. "joe@shmo.com").';
+				} elseif($format === "url" && !valid_url($input)) {
+					$errors[] = 'Please enter a valid link (ex. "http://www.google.com").';
+				} elseif($format === "phone" && !valid_phone($input)) {
+					$errors[] = 'Please enter a valid phone number. (ex. "515-515-5151")';
+				} elseif($format === "position" && !valid_position($input)) {
+					$errors[] = 'Please select a valid position.';
+				} elseif($format === "bool" && !filter_var($input, FILTER_VALIDATE_BOOLEAN)) {
+					$errors[] = 'Please enter a valid '.$name.'.';
+				} elseif($format === "num" && !is_numeric($input)) {
+					$errors[] = 'Please enter a valid '.$name.'.';
+				} elseif($format === "date" && !valid_date($input)) {
+					$errors[] = 'Please enter a valid '.$name.'.';
+				} elseif($format === "name" ){
+					$invalid_char = valid_name($input);
+					if (!($invalid_char===TRUE)){
+						$errors[] = $name.' can not include' .$invalid_char. '.';
+					}
 				}
-			}
 			
+			}
 		}
 		return $errors;
 	}

@@ -656,7 +656,7 @@ if($_POST && isset($_GET['action'])) {
 			// Validate the user_level
 			$result = validate_input($user_level, "Privilege Level", true, "num");
 			$errors = array_merge($errors, $result);
-		
+			
 			// Validate the position
 			$result = validate_input($position, "Position", true, "position");
 			$errors = array_merge($errors, $result);
@@ -803,20 +803,311 @@ if($_POST && $_GET['action'] == "alert"){
 }
 
 if($_GET['action'] == "get" ){
-	//TODO: Add filters & search
+	//TODO: Add search
+	$errors = array();
+	//echo "<pre>";
+	//print_r($_POST);
+	//echo "</pre>";
 	
-	$profiles = mysql_query("SELECT *, AES_DECRYPT(email, '". SALT ."') AS user_email FROM ".TBL_PROFILE ." ORDER BY last_name ASC");
 	
-	if(mysql_num_rows($profiles) == 0)
-	{
-		echo "<p class=\"alert
- no-data\">Sorry, there are no people in this directory.</p>";
+	// WHERE query string to add filters to the MySQL query
+	$where_string = "";
+	$now_showing = "all";
+	
+	if(isset($_POST['search']) && !empty($_POST['search']) ){
+		$search = sanitize($_POST['search']);
+			
+		// Check if there are already WHERE constraints
+		if(empty($where_string)){
+			$where_string = "WHERE ";
+		} else{
+			$where_string .= "AND ";
+		}
+		
+		// Check if any filters have been added to the showing string
+		if($now_showing === "all"){
+			$now_showing = "";
+		}
+		// Add filters to the showing string
+		if(!empty($now_showing)){ $now_showing .= ", "; }
+		$now_showing .= '"'.$search.'"';
+		
+		// Check first names
+		$where_string .= "(`first_name` LIKE '%".$search."%' OR ";
+		// Check last names
+		$where_string .= "`last_name` LIKE '%".$search."%')";// OR ";
+		// Check emails (doesn't work... TODO)
+		//$where_string .= "`email`=AES_ENCRYPT('$search', '". SALT ."')";
+			
+		// TODO: Search other fields
 	}
-	else
-	{ 
-		// echo "<pre>";
-		// 		print_r($staff);
-		// 		echo "</pre>";
+	
+	// Add position filters to query
+	if(isset($_POST['filter_position']) && !empty($_POST['filter_position']) && $_POST['filter_position'] !== "all"){
+		$position = $_POST['filter_position'];
+		$result = validate_input($position, "Position", true, "position");
+		$errors = array_merge($errors, $result);
+		
+		// Check for errors
+		if(count($errors) == 0){
+			
+			// Check if there are already WHERE constraints
+			if(empty($where_string)){
+				$where_string = "WHERE ";
+			} else{
+				$where_string .= "AND ";
+			}
+			
+			// Check if any filters have been added to the showing string
+			if($now_showing === "all"){
+				$now_showing = "";
+			}
+		
+			// Check if there is only one position to filter
+			if(!is_array($position)){
+				$position = array($position);
+			}
+			
+			$filter_string = "";
+		
+			// Add each position filter
+			foreach ($position as $filter) {
+				// Check if there are already filters
+				if(empty($filter_string)){
+					$filter_string = "(";
+				} else{
+					$filter_string .= "OR ";
+				}
+				$filter_string .= "`position`='".$filter."' ";
+				
+				// Add filters to the showing string
+				if(!empty($now_showing)){ $now_showing .= ", "; }
+				$now_showing .= $filter;
+				// Add plural if needed
+				if($filter === "student" || $filter === "visitor"){ $now_showing .= "s"; }
+			}
+
+			$filter_string .= ") ";
+			$where_string .= $filter_string;
+		}
+	}
+	
+	// Add department filters to query
+	if(isset($_POST['filter_department']) && !empty($_POST['filter_department']) && $_POST['filter_department'] !== "all") {
+		$department = $_POST['filter_department'];
+		$result = validate_input($department, "Department", true, "num");
+		$errors = array_merge($errors, $result);
+		
+		// Check for errors
+		if(count($errors) == 0){
+			if(isset($_POST['filter_position']) && !empty($_POST['filter_position'])){
+				if(($_POST['filter_position']) === "all"){
+					$position = array("student", "staff", "alumni", "faculty", "visitor");
+				} elseif(!is_array($position)){
+					$position = array($position);
+				}
+			} else {
+				$position = array("student", "staff", "alumni", "faculty", "visitor");
+			}
+			
+			// Check if there are already WHERE constraints
+			if(empty($where_string)){
+				$department_string = "WHERE ";
+			} else{
+				$department_string = "AND ";
+			}
+			
+			// Check if any filters have been added to the showing string
+			if($now_showing === "all"){
+				$now_showing = "";
+			}
+			
+			$department_string .= "`id` IN (";
+			$filter_string = "";
+			
+			// Check if there is only one department to filter
+			if(!is_array($department)){
+				$department = array($department);
+			}
+					
+			// Add each position filter
+			foreach ($department as $filter) {
+				// Check the position detail tables for people in that department (staff don't have department)
+				if(in_array("student", $position)){
+					// Check if there are already filters
+					if(!empty($filter_string)){ $filter_string .= "UNION "; }
+					$filter_string .= "SELECT `profile_id` FROM `". TBL_STUDENT ."` WHERE `department_id`='".$filter."' ";
+				}
+				if(in_array("faculty", $position)){
+					// Check if there are already filters
+					if(!empty($filter_string)){ $filter_string .= "UNION "; }
+					$filter_string .= "SELECT `profile_id` FROM `". TBL_FACULTY ."` WHERE `department_id`='".$filter."' ";
+				}
+				if(in_array("alumni", $position)){
+					// Check if there are already filters
+					if(!empty($filter_string)){ $filter_string .= "UNION "; }
+					$filter_string .= "SELECT `profile_id` FROM `". TBL_ALUMNI ."` WHERE `department_id`='".$filter."' ";
+				}
+				if(in_array("visitor", $position)){
+					// Check if there are already filters
+					if(!empty($filter_string)){ $filter_string .= "UNION "; }
+					$filter_string .= "SELECT `profile_id` FROM `". TBL_VISITOR ."` WHERE `department_id`='".$filter."' ";
+				}
+				
+				// Add filters to the showing string
+				if(!empty($now_showing)){ $now_showing .= ", "; }
+				$department_qry = mysql_query("SELECT name FROM ". TBL_DEPARTMENT ." WHERE id=".$filter. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+				$dept_name = mysql_fetch_assoc($department_qry);
+				$now_showing .= $dept_name['name'];
+				
+			}
+			
+			// Check if there were any filters added
+			// If there weren't, don't add this section to the WHERE string
+			if(!empty($filter_string)){
+				$filter_string .= ") ";
+				$where_string .= $department_string .$filter_string;
+			}
+			
+			
+		}
+	}
+	
+	if(isset($_POST['filter_company']) && !empty($_POST['filter_company']) && $_POST['filter_company'] !== "all") {
+		$company = $_POST['filter_company'];
+		$result = validate_input($company, "Company", true, "name");
+		$errors = array_merge($errors, $result);
+		
+		// Check for errors
+		if(count($errors) == 0){
+			
+			// Check if there are already WHERE constraints
+			if(empty($where_string)){
+				$where_string = "WHERE ";
+			} else{
+				$where_string .= "AND ";
+			}
+			
+			// Check if any filters have been added to the showing string
+			if($now_showing === "all"){
+				$now_showing = "";
+			}
+			
+			$where_string .= "`id` IN (";
+			$filter_string = "";
+			
+			// Check if there is only one department to filter
+			if(!is_array($company)){
+				$company = array($company);
+			}
+					
+			// Add each position filter
+			foreach ($company as $filter) {
+				// Check if there are already filters
+				if(!empty($filter_string)){ $filter_string .= "UNION "; }
+				$filter_string .= "SELECT `profile_id` FROM `". TBL_ALUMNI ."` WHERE `company`='".$filter."' ";
+				
+				// Add filters to the showing string
+				if(!empty($now_showing)){ $now_showing .= ", "; }
+				$now_showing .= $filter;
+			}
+
+			$filter_string .= ") ";
+			$where_string .= $filter_string;
+		}
+	}
+	if(isset($_POST['filter_program']) && !empty($_POST['filter_program']) && $_POST['filter_program'] !== "all"){
+		$program = $_POST['filter_program'];
+		$result = validate_input($program, "Program", true, "num");
+		$errors = array_merge($errors, $result);
+		
+		// Check for errors
+		if(count($errors) == 0){
+			if(isset($_POST['filter_position']) && !empty($_POST['filter_position'])){
+				if(($_POST['filter_position']) === "all"){
+					$position = array("student", "staff", "alumni", "faculty", "visitor");
+				} elseif(!is_array($position)){
+					$position = array($position);
+				}
+				
+			} else {
+				$position = array("student", "staff", "alumni", "faculty", "visitor");
+			}
+			
+			// Check if there are already WHERE constraints
+			if(empty($where_string)){
+				$program_string = "WHERE ";
+			} else{
+				$program_string = "AND ";
+			}
+			
+			// Check if any filters have been added to the showing string
+			if($now_showing === "all"){
+				$now_showing = "";
+			}
+			
+			$program_string .= "`id` IN (";
+			$filter_string = "";
+			
+			// Check if there is only one department to filter
+			if(!is_array($program)){
+				$program = array($program);
+			}
+					
+			// Add each position filter
+			foreach ($program as $filter) {
+				// Check the position detail tables for people in that program (only students and alumni)
+				if(in_array("student", $position)){
+					// Check if there are already filters
+					if(!empty($filter_string)){ $filter_string .= "UNION "; }
+					$filter_string .= "SELECT `profile_id` FROM `". TBL_STUDENT ."` WHERE `program_id`='".$filter."' ";
+				}
+				if(in_array("alumni", $position)){
+					// Check if there are already filters
+					if(!empty($filter_string)){ $filter_string .= "UNION "; }
+					$filter_string .= "SELECT `profile_id` FROM `". TBL_ALUMNI ."` WHERE `program_id`='".$filter."' ";
+				}
+				
+				// Add filters to the showing string
+				if(!empty($now_showing)){ $now_showing .= ", "; }
+				$prog_qry = mysql_query("SELECT name FROM ". TBL_PROGRAM ." WHERE id=".$filter. " LIMIT 1") or die(error_message("Could not access database", mysql_error(),21));
+				$prog_name = mysql_fetch_assoc($prog_qry);
+				$now_showing .= $prog_name['name'];
+			}
+
+			// Check if there were any filters added
+			// If there weren't, don't add this section to the WHERE string
+			if(!empty($filter_string)){
+				$filter_string .= ") ";
+				$where_string .= $program_string .$filter_string;
+			}
+		}
+		
+	}
+	//echo "<pre>$where_string</pre>";
+		
+	// TODO: Add sort capabilities?
+	$profiles = mysql_query("SELECT *, AES_DECRYPT(email, '". SALT ."') AS user_email 
+							   FROM ".TBL_PROFILE ." ". $where_string.
+						  "ORDER BY last_name ASC") 
+				or die(error_message("Could not access database", mysql_error(),21));
+				
+	if (count($errors) > 0){
+		// Print errors
+		echo '<ul class="error alert"><span>Please correct the following:</span>';
+		foreach($errors as $e) {
+			echo "<li>".$e ."</li>";
+		}
+		echo '</ul>';
+	} elseif(mysql_num_rows($profiles) == 0) {
+		// No matches
+		echo "<p class=\"alert\">Sorry, there are no matches for this search.";
+		if(isset($_POST['search']) && !empty($_POST['search']) ){
+			echo "This search only looks at names. Use the browse options to refine your search further.";
+		}
+		echo "</p>";
+	} else { 
+		echo '<div class="alert" id="now-showing">Showing: '.ucfirst($now_showing).'<span class="badge badge-warning" id="num-results">'.mysql_num_rows($profiles).'</span></div>';
 		
 		// Build profile entry
 		while($row = mysql_fetch_assoc($profiles))

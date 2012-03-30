@@ -21,6 +21,7 @@ define('DB_PASSWORD', 'root');
 /** MySQL hostname */
 define('DB_HOST', 'localhost');
 
+/** Prefix for MySQL tabels */
 define('TBL_PREFIX', 'tassel_');
 
 /** Table Names */
@@ -58,6 +59,11 @@ define ("CUR_YEAR", date('Y'));
 /** Email that automated emails should come from. */
 define ("GLOBAL_EMAIL", "hjhunt11@gmail.com");
 
+/** Is this currently being user-tested?
+  * This modifies how data is stored in the database.
+  */
+define ("USER_TEST", TRUE);
+
 /**
  * Authentication Unique Keys and Salts.
  * @access private
@@ -76,8 +82,8 @@ if($debug){ error_reporting(E_ALL | E_STRICT);}
 /**
  * Absolute Paths to Tassel Files.
  */
-define ("BASE", "http://".$_SERVER['HTTP_HOST']."/HW9_hjhunt_7957");
-define ("ROOT", $_SERVER['DOCUMENT_ROOT']."/HW9_hjhunt_7957");
+define ("BASE", "http://".$_SERVER['HTTP_HOST']."/Tassel");
+define ("ROOT", $_SERVER['DOCUMENT_ROOT']."/Tassel");
 
 
 /**

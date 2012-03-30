@@ -2,6 +2,7 @@
 	/**
 	 * Contains helpful functions for Tassel.
 	 *
+	 * TODO: Find way to merge some of the select functions
 	 * @author Hannah Deering
 	 * @package Tassel
 	 **/
@@ -70,8 +71,8 @@
 		$dropdown = "";
 		$states = mysql_query("SELECT * FROM `". TBL_US_STATE ."`") or die(error_message("No states found", mysql_error(), "33"));
 		$num_rows = mysql_num_rows($states);
-		if( $num_rows > 0 ) {
-			$dropdown .= '<select name="'. $category_name .'states" class="states" id="'. $category_id .'states">';
+		if( $num_rows > 0 ) { 
+			$dropdown .= '<select name="'. $category_name .'states" class="states span4" id="'. $category_id .'states">';
 			$dropdown .= '<option value="">--Select-- </option>';
 			while($r = mysql_fetch_array($states))
 			{
@@ -94,7 +95,7 @@
 		$countries = mysql_query("SELECT * FROM `". TBL_COUNTRY ."`") or die(error_message("No countries found", mysql_error(), "34"));
 		$num_rows = mysql_num_rows($countries);
 		if( $num_rows > 0 ) {
-			$dropdown .= '<select name="'. $category_name .'countries" class="countries" id="'. $category_id .'countries">';
+			$dropdown .= '<select name="'. $category_name .'countries" class="countries span4" id="'. $category_id .'countries">';
 			$dropdown .= '<option value="">--Select-- </option>';
 			while($r = mysql_fetch_array($countries))
 			{	
@@ -122,7 +123,7 @@
 		$programs = mysql_query("SELECT * FROM `". TBL_PROGRAM ."`") or die(error_message("No programs found", mysql_error(), "30"));
 		$num_rows = mysql_num_rows($programs);
 		if( $num_rows > 0 ) {
-			$dropdown .= '<select name="'. $category_name .'program" id="'. $category_id .'program" class="program" >';
+			$dropdown .= '<select name="'. $category_name .'program" id="'. $category_id .'program" class="span4 program" >';
 			$dropdown .= '<option value="">--Select-- </option>';
 			while($r = mysql_fetch_array($programs))
 			{
@@ -149,7 +150,7 @@
 		$colleges = mysql_query("SELECT * FROM `". TBL_COLLEGE ."`") or die(error_message("No colleges found", mysql_error(), "31"));
 		$num_rows = mysql_num_rows($colleges);
 		if( $num_rows > 0 ) {
-			$dropdown .= '<select name="'. $category_name .'college" class="college" id="'. $category_id .'college">';
+			$dropdown .= '<select name="'. $category_name .'college" class="college span4" id="'. $category_id .'college">';
 			$dropdown .= '<option value="">--Select-- </option>';
 			while($r = mysql_fetch_array($colleges))
 			{
@@ -198,7 +199,7 @@
 		$departments = mysql_query("SELECT * FROM `". TBL_DEPARTMENT ."` WHERE college_id = '$college_id'") or die(mysql_error(error_message("No departments found", mysql_error(), "32")));
 		$num_rows = mysql_num_rows($departments);
 		if( $num_rows > 0 ) {
-			$dropdown .= '<select name="'. $category_name .'department" class="department" id="'. $category_id .'department">';
+			$dropdown .= '<select name="'. $category_name .'department" class="department span4" id="'. $category_id .'department">';
 			$dropdown .= '<option value="">--Select-- </option>';
 			while($r = mysql_fetch_array($departments))
 			{
@@ -211,6 +212,46 @@
 			$dropdown = '<p class="error alert">No departments found.</p>';
 		}
 		return $dropdown;
+	}
+	
+	/** Populates selection with all departments from database. */
+	function get_all_department_options(){
+		// TODO: Only show departments with people in them
+		$options = "";
+		$college_qry = mysql_query("SELECT `id`,`name` FROM `". TBL_COLLEGE ."`") or die(mysql_error(error_message("No colleges found", mysql_error(), "32")));
+		while($college = mysql_fetch_assoc($college_qry)){
+			$options .= '<optgroup label="'. $college['name'] .'">';
+			$department_qry = mysql_query("SELECT `id`,`name` FROM `". TBL_DEPARTMENT ."` WHERE college_id = '".$college['id']."'") or die(mysql_error(error_message("No departments found", mysql_error(), "32")));
+			while($department = mysql_fetch_assoc($department_qry)){
+				$options .= '<option value="'.$department['id'].'">'.$department['name'].'</option>';
+			}
+			$options .= '</optgroup>';
+		}
+		return $options;
+	}
+	
+	/** Populates selection with all companies from database. */
+	function get_all_company_options(){
+		$options = "";
+		$company_qry = mysql_query("SELECT DISTINCT `company` FROM `". TBL_ALUMNI ."` ORDER BY `company` ASC") or die(mysql_error(error_message("No companies found", mysql_error(), "32")));
+		while($company = mysql_fetch_assoc($company_qry)){
+			$options .= '<option value="'.$company['company'].'">'.$company['company'].'</option>';
+		}
+		return $options;
+	}
+	
+	/** Populates selection with all programs from database. */
+	function get_all_program_options(){
+		$options = "";
+		$program_qry = mysql_query("SELECT `id`,`name`, `online` FROM `". TBL_PROGRAM ."`") or die(mysql_error(error_message("No programs found", mysql_error(), "32")));
+		while($program = mysql_fetch_assoc($program_qry)){
+			$options .= '<option value="'.$program['id'].'">';
+			if($program['online'] == 1){
+				$options .= 'Online ';
+			}
+			$options .= $program['name'].'</option>';
+		}
+		return $options;
 	}
 	
 	/** Hashes the given password*/
@@ -259,6 +300,7 @@
 		<!--[if lt IE 9]>
 			<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 		<![endif]-->
+		
 		
 		
 		<link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico" />';

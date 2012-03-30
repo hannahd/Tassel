@@ -75,7 +75,7 @@ if(isset($_POST['login']))
 					$msg = "Welcome, " . $first_name." ".$last_name . "! Logging in...";
 
 
-					header("Location: ".BASE."/user");
+					header("Location: ".BASE."/user/index.php?p=". $_SESSION['encrypted_id']);
 				}
 				else
 				{
@@ -107,50 +107,44 @@ if(isset($_POST['login']))
 	<?php include ROOT."/constants/navbar.php"; ?>
 	
 	<div class="container">
-		<?php
-		//Show message if isset
-		if(isset($msg) || !empty($_GET['msg']))
-		{
-			if(!empty($_GET['msg']))
-			{
-				$msg = $_GET['msg'];
-			}
-			echo '<div class="success alert">'.$msg.'</div>';
-		}
-		//Show errorsor message if isset
-		if(!empty($errors))
-		{
-			echo '<div class="error alert">';
-			foreach($errors as $e)
-			{
-				echo $e.'<br />';
-			}
-			echo '</div>';
-		}
-		?>
+		<div class="row">
+			<div class="span7 offset4">
+				<?php
+				//Show message if isset
+				if(isset($msg) || !empty($_GET['msg']))
+				{
+					if(!empty($_GET['msg']))
+					{
+						$msg = $_GET['msg'];
+					}
+					echo '<div class="success alert">'.$msg.'</div>';
+				}
+				//Show errorsor message if isset
+				if(!empty($errors))
+				{
+					echo '<div class="error alert">';
+					foreach($errors as $e)
+					{
+						echo $e.'<br />';
+					}
+					echo '</div>';
+				}
+				?>
 
-		<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" id="login_form">
-			<fieldset>
-				<h3>Log In</h3>
-				<div class="row">
-					<div class="span8">
+				<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" id="login_form">
+					<fieldset>
+						<h3>Log In</h3>
 						<label for="username">Username</label>
 						<input type="text" name="user" value="<?php echo stripslashes($username); ?>" class="required span4" /></td>
-					</div>
-				</div>
-				<div class="row">
-					<div class="span8">
+						
 						<label for="pass">Password</label>
 						<input type="password" name="pass" value="<?php echo stripslashes($pass2); ?>" class="required span4" /></td>
-					</div>
-				</div>
-				<div class="row">
-					<div class="span8">
+						
 						<input type="submit" name="login" value="Log In" class="span4 btn btn-primary btn-large"/>
-					</div>
-				</div>
-			</fieldset>
-		</form>
+					</fieldset>
+				</form>
+			</div>
+		</div>
 
 	</div>
 </body>

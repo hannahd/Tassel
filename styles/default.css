@@ -2,10 +2,6 @@ body {
 	padding-top:60px; /*to account for the navbar*/
 }
 
-.container, .navbar .container{
-	width:700px;
-}
-
 img {
 	border:5px solid #fff;
 	-webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
@@ -47,7 +43,6 @@ img {
 
 .contact-info h6{
     display: inline-block;
-	
     margin: 0 3px 0 0;
 }
 
@@ -56,11 +51,13 @@ a.phone{
 	color:#000;
 }
 
+small{
+    font-size: .9em;
+}
+
 small.update{
     font-style: italic;
-	
     color: #999;
-    font-size: .9em;
 }
 
 .expand-profile {
@@ -72,4 +69,52 @@ label.error{
 	display: inline-block;
 	vertical-align: middle;
 	padding-left: 10px;
+}
+
+.sidebar hr {
+	margin: 5px 0;
+}
+
+.sidebar #filter-search {
+	margin: 0;
+	width: 112px;
+}
+
+.sidebar h4 {
+	margin-bottom: 6px;
+}
+
+label{
+	margin: 1px 0;
+}
+
+#num-results{
+	float:right;
+	background-color:#c09853;
+}
+
+#num-results:hover {
+	cursor:inherit;
+	color: #ffffff;
+	text-decoration: none;
+	background-color:#c09853;
+}
+
+.hidden {
+	display:none;
+}
+
+.sidebar form {
+	margin:0;
+}
+
+textarea.tall{
+	height: 96px;
+}	
+textarea.xtall{
+	height: 196px;
+}
+
+#message[class*="span"]{
+	margin-left:0;
 }

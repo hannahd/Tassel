@@ -8,7 +8,6 @@
 	 * @author Hannah Deering
 	 * @package Tassel
 	 **/
-	
 	require_once ("constants.php");
 	include_once (ROOT."/constants/functions.php");
 	
