@@ -1,124 +1,233 @@
 <?php
 require_once ("constants/constants.php");
-require_once (ROOT."/constants/dbconnect.php"); //Includes database connection
-require_once (ROOT."/constants/functions.php"); //Includes functions
-require_once (ROOT."/constants/access-functions.php"); //Includes functions to control user privileges
-
-if(isset($_SESSION['user_id'])){ secure_page(); }
+require_once ("constants/dbconnect.php"); //Includes database connection
+require_once ("constants/controls.php"); //Includes functions
 ?>
 <!DOCTYPE html>
 <head>
 	<?php echo get_head_meta("Directory"); ?>
 	
 	<script type="text/javascript">
-		$(document).ready(function(){
-			// If none of the filters are set, don't display any profiles.
-			$('#directory-profiles').hide();
-			$('#directory-summary').show();
-			$('.filter-program').hide();
-			$('.filter-company').hide();
-			
-			$(".filter").change(function() {
-				
-				if($("#filter-position option:selected").val() == "student"){
-					$(".filter-department").show();
-					$(".filter-program").show();
-					$(".filter-company").hide();
-					$("#filter-company").val("all");
-				} else if($("#filter-position option:selected").val() == "alumni"){
-					$(".filter-department").show();
-					$(".filter-program").show();
-					$(".filter-company").show();
-				} else if($("#filter-position option:selected").val() == "faculty"){
-					$(".filter-department").show();
-					$(".filter-program").hide();
-					$("#filter-program").val("all");
-					$(".filter-company").hide();
-					$("#filter-company").val("all");
-				} else if($("#filter-position option:selected").val() == "staff"){
-					$(".filter-department").hide();
-					$("#filter-department").val("all");
-					$(".filter-program").hide();
-					$("#filter-program").val("all");
-					$(".filter-company").hide();
-					$("#filter-company").val("all");
-				} else if($("#filter-position option:selected").val() == "visitor"){
-					$(".filter-department").show();
-					$(".filter-program").hide();
-					$("#filter-program").val("all");
-					$(".filter-company").hide();
-					$("#filter-company").val("all");
+		function update_results(){
+			var datastring = $('#filters').serialize() + 						
+							 "&" + $("#filter-search").serialize() +
+						 	 "&" + $("#view").serialize() +
+							 "&" + $("#page").serialize() +
+							 "&" + $.trim($('#advanced-search-params').text()); 
+			//alert(datastring);
+			$.ajax({
+				type: "POST",
+				url: "<?php echo BASE; ?>/constants/get-profile.php?action=get",
+				data: datastring,
+				success: function(response) {
+					$('#directory-profiles').show().html(response);
+					// Display directory table
+					//var obj = jQuery.parseJSON(response);
+					//$('#directory-profiles').show().html(obj.content);
+					//update_page_dd(obj.num_pages);
 				}
-				
-					
-				var datastring = $('#filters').serialize();
+			});
+		}
+		
+		function update_url(){
+			var datastring = "";
+			// Add search
+			datastring += "&s=" + $('#filter-search').val();
 			
-				$.ajax({
-					type: "POST",
-					url: "<?php echo BASE; ?>/constants/process.php?action=get",
-					data: datastring,
-					success: function(response) {
-						$('#directory-summary').hide();
-						
-						// Display directory table
-						$('#directory-profiles').show().html(response);
-					}
-				});
+			// Add position
+			datastring += "&fp=" + $('#filter-position').val();
+			
+			// Add department
+			datastring += "&fd=" + $('#filter-department').val();
+			
+			// Add interests
+			datastring += "&fi=" + $('#filter-interest').val();
+			
+			// Add program
+			datastring += "&fpr=" + $('#filter-program').val();
+			
+			// Add employer
+			datastring += "&fc=" + $('#filter-company').val();
+			
+			// Add page
+			datastring += "&p=" + $('#top-page').val();
+			
+			// Add sort
+			datastring += "&st=" + $('#sort-by').val();
+			
+			// Add show
+			datastring += "&sh=" + $('#num-profiles').val();
+			
+			window.location.hash = "#"+datastring;
+		}
+		
+		function decode_url(){
+			var datastring = window.location.hash;
+			var pairs = datastring.split('&');
+			
+			// Change values for any values set
+			for (var i=0, n=pairs.length; i < n; i++) {
+				p = pairs[i].split('=');
+				switch(p[0]) {
+					case "s":
+					  // Change search
+					  $('#filter-search').val(p[1]);
+					  break;
+					case "fp":
+					  // Change position
+					  $('#filter-position').val(p[1]);
+					  break;
+					case "fd":
+					  // Change department
+					  $('#filter-department').val(p[1]);
+					  break;
+					case "fi":
+					  // Change interests
+					  $('#filter-interest').val(p[1]);
+					  break;
+					case "fpr":
+					  // Change program
+					  $('#filter-program').val(p[1]);
+					  break;
+					case "fc":
+					  // Change employer
+					  $('#filter-company').val(p[1]);
+					  break;
+					case "p":
+					  // Change page
+					  $('#top-page').val(p[1]);
+					  break;
+					case "st":
+					  // Change sort
+					  $('#sort-by').val(p[1]);
+					  break;
+					case "sh":
+					  // Change show
+					  $('#num-profiles').val(p[1]);
+					  break;
+				}
+			}
+		}
+		
+		
+		function update_page_dd(num_pages){
+			if(num_pages > 1){
+				var ret_val = "";
+				for (var i=1; i <= num_pages; i++) {
+					ret_val += '<option value="'+ i + '">' + i + '</option>';
+				};
+				$('#top-page-label').show();
+				$('#top-page').show().html(ret_val);
+			} else {
+				$('#top-page-label').hide();
+				$('#top-page').hide();
+			}
+		}
+		
+		function interest_link(id){
+			window.event.preventDefault();
+			clear_filters();
+			$("#filter-interest").val(id);
+			update_results();
+			update_url();
+		}
+		
+		function page_link(pg){
+			window.event.preventDefault();
+			if(pg > 0){
+				$("#top-page").val(pg);
+				$('body,html').animate({scrollTop: 0}, 400);
+				update_results();
+				update_url();
+			}
+		}
+		
+		function toggle_details(id){
+			window.event.preventDefault();
+			$('#expand-profile-'+id).toggle('fast', function() {
+			    if($(this).css('display') == "none") {
+					$('#toggle-'+id).html("+ more");
+				} else {
+					$('#toggle-'+id).html("- less");
+				}
+			  });
+		}
+		
+		function clear_filters(){
+			$("#filter-position").val("all");
+			$("#filter-department").val("all");
+			$("#filter-interest").val("all");
+			$("#filter-program").val("all");
+			$("#filter-company").val("all");
+			$("#filter-search").val("");
+			update_results();
+			window.location.hash = "";
+		}
+		
+		$(window).bind( 'hashchange', function(e) {
+			decode_url();
+			update_results();
+		});
+		
+		
+		$(document).ready(function(){
+			
+			$('#top-page-label').hide();
+			$('#top-page').hide();
+			decode_url();
+			update_results();
+			
+			$(".update").change(function() {
+				//update_results();
+				update_url();	
 			});
 			
-			$("#clear").click(function() {
-				$('#directory-profiles').hide();
-				$('#directory-summary').show();
-				$('.filter-department').show();
-				$('.filter-program').hide();
-				$('.filter-company').hide();
-				$("#filter-position").val("all");
-				$("#filter-department").val("all");
-				$("#filter-program").val("all");
-				$("#filter-company").val("all");
-				$("#filter-search").val("");
+			$("#clear").click(function(event) {
+				event.preventDefault();
+				clear_filters();
 			});
 			
 			$("#filter-search").keyup(function() {
-				
-				var datastring = $('#filters').serialize() 
-								 + "&" + $("#filter-search").serialize();
-				
-				$.ajax({
-					type: "POST",
-					url: "<?php echo BASE; ?>/constants/process.php?action=get",
-					data: datastring,
-					success: function(response) {
-						$('#directory-summary').hide();
-						
-						// Display directory table
-						$('#directory-profiles').show().html(response);
-					}
-				});
+				update_results();	
 			});
 			
+			$("#filter-search").focusout(function() {
+				update_url();	
+			});
 			
-		
+			var showLoader;
+			
+			$('#loading')
+				  .hide()  // hide it initially
+		    .ajaxStart(function() {
+				showLoader = window.setTimeout("$('#loading').fadeIn('fast')",50);
+		    })
+		    .ajaxStop(function() {
+				window.clearTimeout(showLoader);
+		        $(this).fadeOut("fast");
+		    });
+			
 			/*var auto_refresh = setInterval(function(){
 					$('#directory-profiles').load("<?php echo BASE; ?>/constants/process.php?action=get");
 			}, 500000); //Refresh every 10 minutes */
 			
 		});
+		
 	</script>
 </head>
 <body>
-	<?php include ROOT.'/constants/navbar.php'; ?>
+	<?php include 'constants/navbar.php'; ?>
 	<noscript><div class="container"><div class="row"><div class="span4 offset4"><p class="error alert"Javascript must be enabled to view this directory.</p></div></div></div></noscript>
 	<div class="container">
 		<div class="row">
 			<div class="span2 well sidebar"> 
 				<h4>Search</h4>
-				<input class="span2 search-query" id="filter-search" name="search" size="16" type="text" placeholder="Search">
+				<input class="span2 search-query" id="filter-search" name="search[]" size="16" type="text" placeholder="Search">
 				<hr/>
 				<h4>Browse</h4>
 				<form name="filters" id="filters">
 					<label for="filter_position" class="filter-position">Position</label>
-					<select name="filter_position" id="filter-position" class="span2 filter filter-position">
+					<select name="position[]" id="filter-position" class="span2 update filter-position">
 						<option value="all">All</option>
 						<option value="faculty">Faculty</option>
 						<option value="staff">Staff</option>
@@ -126,43 +235,101 @@ if(isset($_SESSION['user_id'])){ secure_page(); }
 						<option value="student">Student</option>
 						<option value="visitor">Visitor</option>
 					</select>
-				
-					<label for="filter_department" class="filter-department">Department</label>
-					<select name="filter_department" id="filter-department" class="span2 filter filter-department">
+					
+					<label for="filter-program" class="filter-program">Program</label>
+					<select name="program[]" id="filter-program" class="span2 update filter-program">
 						<option value="all">Any</option>
 						<?php
-						/*Populate departments*/
-						echo get_all_department_options();
+							/*Populate programs*/
+							echo program_control("dropdown", "program", "", "");
+						?>
+					</select>
+				
+					<label for="filter-department" class="filter-department">Department</label>
+					<select name="department[]" id="filter-department" class="span2 update filter-department">
+						<option value="all">Any</option>
+						<?php
+							/*Populate departments*/
+							echo all_departments_control(true, "dropdown", "department", "", "");
 						?>
 					</select>
 					
-					<label for="filter_program" class="filter-program">Program</label>
-					<select name="filter_program" id="filter-program" class="span2 filter filter-program">
+					<label for="filter-interest" class="filter-interest">Interests</label>
+					<select name="interest[]" id="filter-interest" class="span2 update filter-interest">
 						<option value="all">Any</option>
 						<?php
-						/*Populate programs*/
-						echo get_all_program_options();
+							/*Populate interest*/
+							echo interest_control("", true, "dropdown", "interest", "", "");
 						?>
 					</select>
 				
-					<label for="filter_company" class="filter-company">Employer</label>
-					<select name="filter_company" id="filter-company" class="span2 filter filter-company">
+					<label for="filter-company" class="filter-company">Employer</label>
+					<select name="company[]" id="filter-company" class="span2 update filter-company">
 						<option value="all">Any</option>
 						<?php
-						/*Populate companies*/
-						echo get_all_company_options();
+							/*Populate companies*/
+							echo company_control("dropdown", "company", "", "");
 						?>
 					</select>
 				</form>
 				<hr />
-				<small><a href="#" id="clear">clear</a> | <a href="#">advanced options</a></small>
+				<small><a href="#" id="clear">clear</a> | <a href="<?echo BASE;?>/advanced_search.php">advanced options</a></small>
 			</div>
 			<div class="span9">
-				<p class="well" id="directory-summary">With more than 70 faculty members from 37 departments, the HCI Graduate Program is truly an interdisciplinary degree program. Led by James H. Oliver, the Director of Graduate Education, and Stephen Gilbert, the Associate Director of Graduate Education, graduates of our program are well prepared for careers in business and industry, academia, or to continue their studies. Our graduates are employed in companies, including Microsoft, Boeing, Lockheed Martin, Deere and Co., Rockwell Collins, EA Interactive, Google, Garmin, and many others.
-					<br /><br /><strong>Please use the search or menus on the left to find the people that make up this great program.</strong></p>
+				<div class="well" id="view-option">
+					<form name="page" id="page" class="form-inline">
+						<label for="top-page" id="top-page-label" class="view-controls first">Page</label>
+						<select name="page" id="top-page" class="view-controls mini update">
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+						</select>
+						<label id="loading" style="display: none; "><img class="blank" src="<? echo BASE;?>/images/ajax-loader.gif" alt="Updating..."></label>
+					</form>
+					
+					<form name="view" id="view" class="form-inline">
+						<label for="sort-by" class="view-controls first">Sort by</label>
+						<select name="sort" id="sort-by" class="view-controls update">
+							<option value="last_asc">Last Name</option>
+							<option value="first_asc">First Name</option>
+							<option value="grad_asc">Earliest Graduation</option>
+							<option value="grad_desc">Latest Graduation</option>
+						</select>
+						
+						<label for="num-profiles" class="view-controls">Show</label>
+						<select name="show" id="num-profiles" class="mini view-controls update">
+							<option value="10">10</option>
+							<option value="25" selected="selected">25</option>
+							<option value="50">50</option>
+							<option value="100">100</option>
+							<option value="200">200</option>
+						</select>
+					</form>
+				</div>
+				
 				
 				<!-- Directory Entries-->
 				<div id="directory-profiles"></div>
+				
+				<div id="footer"></div>
+				<div class="hidden" id="advanced-search-params">
+					<?php
+						if ($_POST) {
+						  $kv = array();
+						  foreach ($_POST as $key => $value) {
+						    if(is_array($value)){
+								foreach ($value as $val_value) {
+									$kv[] = "$key"."[]=$val_value";	
+								}
+							} else{
+								$kv[] = "$key=$value";
+							}
+						  }
+						  $query_string = join("&", $kv);
+						  echo $query_string;
+						}
+					?>
+				</div>
 			</div>
 		</div>
 	</div>	

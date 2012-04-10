@@ -16,8 +16,9 @@
 		if (is_array($input)) {
 			// Recursively validate each item in the array
 	        foreach($input as $var=>$val) {
-	            $errors[$var] = validate_input($val, $name, $is_required, $format, $max_char = -1, $min_char = -1);
-	        }
+				$result = validate_input($val, $name, $is_required, $format, $max_char = -1, $min_char = -1);
+	        	$errors = array_merge($errors, $result);
+			}
 	    } else {
 			// Check if a required field is empty
 			if($is_required && empty($input)) {
@@ -82,7 +83,7 @@
 	
 	/** Checks that do not contain invalid characters. */
 	function valid_name($string) {
-		$invalid_char = array('{','}','\\','/','(',')',';','<','>','*','$','%','@','?','^','!','+','=','[',']','`', '~');
+		$invalid_char = array('{','}','/','(',')',';','<','>','*','$','%','@','?','^','!','+','=','[',']','`', '~');
 		foreach($invalid_char as $c){
 			if(!(strpos($string, $c)===FALSE)){
 				return $c;
@@ -139,6 +140,19 @@
 	    }
 
 	    return $output;
+	}
+	
+	/** Purge non-valid characters */
+	function purge_invalid($input){
+		if (is_array($input)) {
+	        foreach($input as $var=>$val) {
+	            $input[$var] = purge_invalid($val);
+	        }
+	    } else {
+			$invalid_char = array('{','}','/','(',')',';','<','>','*','$','%','@','?','^','!','+','=','[',']','`', '~',',','-','\\','\'','"',':');
+			$input = str_replace($invalid_char, "", $input);
+		}
+		return $input;
 	}
 	
 	

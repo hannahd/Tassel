@@ -1,6 +1,4 @@
-body {
-	padding-top:60px; /*to account for the navbar*/
-}
+
 
 img {
 	border:5px solid #fff;
@@ -14,13 +12,15 @@ img {
 	float: left;
 	margin-top: 20px;
 }
-
-.profile img.blank{
-	width:100px;
+img.blank{
 	border-width:0;
 	-webkit-box-shadow: 0 0 0 #000;
 	-moz-box-shadow: 0 0 0 #000;
 	box-shadow: 0 0 0 #000;
+}
+
+.profile img.blank{
+	width:100px;
 }
 .profile{
 	clear:both;
@@ -58,6 +58,7 @@ small{
 small.update{
     font-style: italic;
     color: #999;
+	display: block;
 }
 
 .expand-profile {
@@ -72,6 +73,11 @@ label.error{
 }
 
 .sidebar hr {
+	margin: 5px 0;
+}
+
+hr {
+	clear: both;
 	margin: 5px 0;
 }
 
@@ -104,7 +110,7 @@ label{
 	display:none;
 }
 
-.sidebar form {
+form {
 	margin:0;
 }
 
@@ -117,4 +123,114 @@ textarea.xtall{
 
 #message[class*="span"]{
 	margin-left:0;
+}
+.profile h4{
+	margin-bottom:4px;
+}
+
+#interests {
+	margin: 2px 0 10px 0;
+	border: 1px solid #ccc;
+	padding: 4px 6px;
+	display:block;
+	width:100%;
+	height: 150px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+.inline {
+	display: inline-block;
+	padding-right: 5px;
+}
+
+.expand-profile.btn{
+    display: block;
+    width: 42px;
+}
+
+#now-showing {
+	margin-bottom: -4px;
+	margin-top: -20px;
+	-webkit-top-left-border-radius: 0;
+	-webkit-top-right-border-radius: 0;
+	-moz-top-left-border-radius: 0;
+	-moz-top-right-border-radius: 0;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+
+#view-option {
+	padding: 8px 12px;
+	-webkit-bottom-left-border-radius: 0;
+	-webkit-bottom-right-border-radius: 0;
+	-moz-bottom-left-border-radius: 0;
+	-moz-bottom-right-border-radius: 0;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+form#view{
+	float:right;
+}
+form#page{
+	float:left;
+}
+
+#view-option select{
+	height: 20px;
+}
+#sort-by{
+	width: 145px;
+}
+#view-option label{
+	color: #999;
+	padding-left: 9px;
+	border-left: 1px solid #ccc;
+	margin-left: 6px;
+}
+#view-option label.first{
+	padding-left: 0;
+	border-left-width: 0;
+	margin-left: 0;
+}
+
+#link img{
+	opacity: 0.55;
+}
+#link {
+	height: 20px;
+	width: 17px;
+	padding: 0 6px;
+	margin-left: 5px;
+}
+
+.pagination ul {
+margin-top: -1px;
+
+}
+
+#footer{
+	height: 50px;
+	clear:both;
+}
+
+.btn {
+	margin-right: 5px;
+}
+#btm-clear{
+	padding-left: 15px;
+	padding-right: 15px;
+}
+#advanced-search .checkbox{
+	width: 270px;
+	float: left;
+	padding-right: 25px;
+	cursor: pointer;
+}
+#advanced-search h5{
+	padding-top:15px;
+	clear: both;
 }

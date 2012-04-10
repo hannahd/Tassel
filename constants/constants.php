@@ -6,20 +6,54 @@
 	 * @author Hannah Deering
 	 * @package Tassel
 	 **/
+	
+//Determine if we're running on localhost or live
+if(stristr($_SERVER['HTTP_HOST'], 'local') || (substr($_SERVER['HTTP_HOST'], 0, 7) == '192.168')) {
+	$local = true;
+} else {
+	$local = false;
+}
 
 /* MySQL settings
  * ===================================================================*/
-/** The name of the database for Tassel */
-define('DB_NAME', 'tassel');
+if($local) {
 
-/** MySQL database username */
-define('DB_USER', 'root');
+	/** The name of the database for Tassel */
+	define('DB_NAME', 'tassel');
 
-/** MySQL database password */
-define('DB_PASSWORD', 'root');
+	/** MySQL database username */
+	define('DB_USER', 'root');
 
-/** MySQL hostname */
-define('DB_HOST', 'localhost');
+	/** MySQL database password */
+	define('DB_PASSWORD', 'root');
+
+	/** MySQL hostname */
+	define('DB_HOST', 'localhost');
+	
+	/**
+	 * Absolute Paths to Tassel Files.
+	 */
+	define ("BASE", "http://".$_SERVER['HTTP_HOST']."/Tassel");
+	define ("ROOT", $_SERVER['DOCUMENT_ROOT']."/Tassel");
+} else {
+	/** The name of the database for Tassel */
+	define('DB_NAME', 'a8618040_tassel');
+
+	/** MySQL database username */
+	define('DB_USER', 'a8618040_monarch');
+
+	/** MySQL database password */
+	define('DB_PASSWORD', 'f4L0rDjH');
+
+	/** MySQL hostname */
+	define('DB_HOST', 'mysql13.000webhost.com');
+	
+	/**
+	 * Absolute Paths to Tassel Files.
+	 */
+	define ("BASE", "http://".$_SERVER['HTTP_HOST']);
+	define('ROOT', $_SERVER['DOCUMENT_ROOT'] . '/home/a8618040/public_html');
+}
 
 /** Prefix for MySQL tabels */
 define('TBL_PREFIX', 'tassel_');
@@ -29,11 +63,7 @@ define('TBL_PROFILE_GROUP_MAP', TBL_PREFIX.'map_profile_group');
 define('TBL_PROFILE_INTEREST_MAP', TBL_PREFIX.'map_profile_interest');
 define('TBL_PROFILE_LINK_MAP', TBL_PREFIX.'map_profile_link');
 define('TBL_PROFILE_PROFILE_MAP', TBL_PREFIX.'map_profile_profile');
-define('TBL_ALUMNI', TBL_PREFIX.'alumni');
-define('TBL_FACULTY', TBL_PREFIX.'faculty');
-define('TBL_STAFF', TBL_PREFIX.'staff');
-define('TBL_STUDENT', TBL_PREFIX.'student');
-define('TBL_VISITOR', TBL_PREFIX.'visitor');
+define('TBL_DETAILS', TBL_PREFIX.'details');
 define('TBL_DEPARTMENT', TBL_PREFIX.'department');
 define('TBL_COLLEGE', TBL_PREFIX.'college');
 define('TBL_COUNTRY', TBL_PREFIX.'country');
@@ -62,7 +92,7 @@ define ("GLOBAL_EMAIL", "hjhunt11@gmail.com");
 /** Is this currently being user-tested?
   * This modifies how data is stored in the database.
   */
-define ("USER_TEST", TRUE);
+define ("USER_TEST", FALSE);
 
 /**
  * Authentication Unique Keys and Salts.
@@ -76,14 +106,12 @@ define('PASSSALT', 'A-Kzl4wlSdVGGpq?- XS-DT^W+vr0(]JKz4>P`}-:3%PN~[LyS=KHsBeOC>N
  *
  * Change this to true to enable the display of notices during development.
  */
-$debug = true;
-if($debug){ error_reporting(E_ALL | E_STRICT);}
-
-/**
- * Absolute Paths to Tassel Files.
- */
-define ("BASE", "http://".$_SERVER['HTTP_HOST']."/Tassel");
-define ("ROOT", $_SERVER['DOCUMENT_ROOT']."/Tassel");
+if($local){
+	$debug = true;
+	if($debug){ error_reporting(E_ALL | E_STRICT);}
+} else {
+	$debug = false;
+}
 
 
 /**

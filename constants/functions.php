@@ -102,7 +102,7 @@
 				$dropdown .= '<option value="'.$r['id'].'"';
 				// Select US by default
 				if($r['name'] == "United States") { 
-					$dropdown .= " selected=\"selected\"";
+					$dropdown .= " selected=\"true\"";
 				}
 				$dropdown .= '>'.$r['name'].'</option>';
 			}
@@ -254,6 +254,40 @@
 		return $options;
 	}
 	
+	/** Populates selection with all companies from database. */
+	function get_all_interest_options(){
+		$options = "";
+		$interest_qry = mysql_query("SELECT `name`, `id` FROM `". TBL_INTEREST ."` ORDER BY `name` ASC") or die(mysql_error(error_message("No companies found", mysql_error(), "32")));
+		while($interest = mysql_fetch_assoc($interest_qry)){
+			$options .= '<option value="'.$interest['id'].'">'.$interest['name'].'</option>';
+		}
+		return $options;
+	}
+	
+	/** Populates selection with all programs from database. */
+	function get_interests($search=""){
+		$checkboxes = "";
+		
+		$where_string = "";
+		$search= sanitize($search);
+		$search = purge_invalid($search);
+		
+		// Check if there are already WHERE constraints
+		if(!empty($search)){
+				$where_string = "WHERE `name` LIKE '%".$search."%' ";
+		}
+		
+		$interest_qry = mysql_query("SELECT `id`,`name` FROM `". TBL_INTEREST ."` ". $where_string. "ORDER BY `name` ASC") or die(mysql_error(error_message("No interests found", mysql_error(), "32")));
+		while($interest = mysql_fetch_assoc($interest_qry)){
+			$checkboxes .= '<label class="checkbox" for="interest-'. $interest['id'] .'">
+			<input type="checkbox" name="interest[]" class="active-entry" value="'. strtolower($interest['id']) .'" id="interest-'. $interest['id'] .'" />'. strtolower($interest['name']) .'</label>';
+		}
+		if(empty($checkboxes)) {
+			echo "<em>Sorry, no interests match that search.</em>";
+		}
+		return $checkboxes;
+	}
+	
 	/** Hashes the given password*/
 	function hash_pass($password) {
 		$hashed = md5(sha1($password));
@@ -284,7 +318,7 @@
 		=============================================================== -->
 		<script language="JavaScript" type="text/javascript" src="'. BASE .'/scripts/jquery-1.7.1.min.js"></script>
 		<script language="JavaScript" type="text/javascript" src="'. BASE .'/scripts/jquery.validate.js"></script>
-
+		
 		<!-- STYLESHEETS
 		=============================================================== -->
 		

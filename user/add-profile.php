@@ -1,8 +1,8 @@
 <?php
 require_once ("../constants/constants.php");
-require_once (ROOT."/constants/dbconnect.php"); //Includes database connection
-require_once (ROOT."/constants/functions.php"); //Includes functions
-require_once (ROOT."/constants/access-functions.php"); //Includes functions to control user privileges
+require_once ("../constants/dbconnect.php"); //Includes database connection
+require_once ("../constants/functions.php"); //Includes functions
+require_once ("../constants/access-functions.php"); //Includes functions to control user privileges
 
 secure_page();
 
@@ -78,6 +78,10 @@ secure_page();
 						}
 					}
 					});
+				} else {
+					$('html, body').animate({
+					         scrollTop: $(".error").offset().top - 80
+					     }, 1000);
 				}
 				
 				return false;
@@ -206,7 +210,7 @@ secure_page();
 	</script>
 </head>
 <body>
-	<?php include ROOT.'/constants/navbar.php'; ?>
+	<?php include '../constants/navbar.php'; ?>
 	<div class="container">	
 		<div class="row">
 			<div class="span7 offset4">

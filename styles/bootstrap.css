@@ -2064,7 +2064,7 @@ table .span24 {
   box-shadow: none;
 }
 .btn-large {
-  padding: 9px 14px;
+  padding: 9px 35px;
   font-size: 15px;
   line-height: normal;
   -webkit-border-radius: 5px;
@@ -3162,6 +3162,7 @@ input[type="submit"].btn.btn-mini {
 .pagination {
   height: 36px;
   margin: 18px 0;
+  clear: both;
 }
 .pagination ul {
   display: inline-block;
@@ -3188,6 +3189,7 @@ input[type="submit"].btn.btn-mini {
   text-decoration: none;
   border: 1px solid #ddd;
   border-left-width: 0;
+  background-color: #fff;
 }
 .pagination a:hover,
 .pagination .active a {

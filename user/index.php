@@ -1,9 +1,9 @@
 <?php
 require_once ("../constants/constants.php");
-require_once (ROOT."/constants/dbconnect.php"); //Includes database connection
-require_once (ROOT."/constants/functions.php"); //Includes functions
-require_once (ROOT."/constants/validation-functions.php");
-require_once (ROOT."/constants/access-functions.php"); //Includes functions to control user privileges
+require_once ("../constants/dbconnect.php"); //Includes database connection
+require_once ("../constants/functions.php"); //Includes functions
+require_once ("../constants/validation-functions.php");
+require_once ("../constants/access-functions.php"); //Includes functions to control user privileges
 
 secure_page();
 
@@ -342,6 +342,26 @@ if(isset($_GET['p'])) {
 				});
 			});
 			
+			$("#clear").click(function(event) {
+				$("#interests .checkbox").show();
+				$("#search-interests").val("");
+				event.preventDefault();
+			});
+			
+			$("#search-interests").keyup(function() {
+				if($('#search-interests').val() != "") {
+				     $("#interests .checkbox").each(function(index, item) {
+				         if($(this).text().indexOf($('#search-interests').val()) != -1){
+				            $(this).show();                     
+				         } else{
+				            $(this).hide();                 
+				         }
+				       });
+				} else{  
+			    	$("#interests .checkbox").show();
+			   	}
+			});
+			
 			// Show and hide the comajor college and department menus
 			$("#alumni-comajor").change(function () {
 				if($("#alumni-comajor").attr('checked')){
@@ -363,7 +383,7 @@ if(isset($_GET['p'])) {
 	</script>
 </head>
 <body>
-	<?php include ROOT.'/constants/navbar.php'; ?>
+	<?php include '../constants/navbar.php'; ?>
 	<div class="container">
 		<div class="row">
 			<div class="span7 offset4">
@@ -798,7 +818,16 @@ if(isset($_GET['p'])) {
 							?>
 						</select>
 					</fieldset>
-			
+					
+					<fieldset id="interests-set">
+						<input type="text" name="search_interests" value="" class="span4 search-query" id="search-interests" placeholder="Search Interests">
+						<small style="margin-left:5px;"><a href="#" id="clear">clear</a></small>
+						<div id="interests">
+							<?php
+								echo get_interests();
+							?>
+						</div>
+					</fieldset>
 			
 					<input type="submit" value="Save Changes" id="profile-submit" class="submit btn btn-primary span4" />
 			
@@ -819,7 +848,7 @@ if(isset($_GET['p'])) {
 			<?php echo get_head_meta("Edit Profile"); ?>
 		</head>
 		<body>
-			<?php include ROOT.'/constants/navbar.php'; ?>
+			<?php include '../constants/navbar.php'; ?>
 			<div class="container">
 				<p class="alert
  no-data">You do not have permission to edit this profile.</p>
@@ -838,7 +867,7 @@ else {
 		<?php echo get_head_meta("Edit Profile"); ?>
 	</head>
 	<body>
-		<?php include ROOT.'/constants/navbar.php'; ?>
+		<?php include '../constants/navbar.php'; ?>
 		<div class="container">
 			<p class="alert
  no-data">Sorry, we couldn't find this profile.</p>

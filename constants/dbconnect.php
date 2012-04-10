@@ -9,7 +9,7 @@
 	 * @package Tassel
 	 **/
 	require_once ("constants.php");
-	include_once (ROOT."/constants/functions.php");
+	include_once ("functions.php");
 	
 	/** Connect to MYSQL */
 	$connect = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD) or die(error_message("Error connecting to database", mysql_error(), "01"));

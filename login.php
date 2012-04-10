@@ -1,9 +1,9 @@
 <?php
 require_once ("constants/constants.php");
-require_once (ROOT."/constants/functions.php"); //Includes functions
-require_once (ROOT."/constants/access-functions.php"); //Includes functions to control user privileges
-require_once (ROOT."/constants/dbconnect.php"); //Includes database connection
-require_once (ROOT."/constants/validation-functions.php"); //Includes functions for form validation
+require_once ("constants/functions.php"); //Includes functions
+require_once ("constants/access-functions.php"); //Includes functions to control user privileges
+require_once ("constants/dbconnect.php"); //Includes database connection
+require_once ("constants/validation-functions.php"); //Includes functions for form validation
 
 //Pre-assign our variables to avoid undefined indexes
 $username = NULL;
@@ -104,7 +104,7 @@ if(isset($_POST['login']))
 </head>
 <body>
 
-	<?php include ROOT."/constants/navbar.php"; ?>
+	<?php include "constants/navbar.php"; ?>
 	
 	<div class="container">
 		<div class="row">
