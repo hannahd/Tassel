@@ -1,5 +1,3 @@
-
-
 img {
 	border:5px solid #fff;
 	-webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
@@ -83,7 +81,7 @@ hr {
 
 .sidebar #filter-search {
 	margin: 0;
-	width: 112px;
+	width: 150px;
 }
 
 .sidebar h4 {
@@ -133,7 +131,7 @@ textarea.xtall{
 	border: 1px solid #ccc;
 	padding: 4px 6px;
 	display:block;
-	width:100%;
+	width: 245px;
 	height: 150px;
 	overflow-y: auto;
 	overflow-x: hidden;
@@ -142,14 +140,16 @@ textarea.xtall{
 	border-radius: 5px;
 }
 
+
 .inline {
 	display: inline-block;
 	padding-right: 5px;
 }
 
 .expand-profile.btn{
-    display: block;
     width: 42px;
+    clear: both;
+    float: right;
 }
 
 #now-showing {
@@ -181,6 +181,7 @@ form#page{
 
 #view-option select{
 	height: 20px;
+	padding: 0;
 }
 #sort-by{
 	width: 145px;
@@ -233,4 +234,65 @@ margin-top: -1px;
 #advanced-search h5{
 	padding-top:15px;
 	clear: both;
+}
+
+.actions {
+	width: 108px;
+}
+
+.actions img{
+	padding: 2px 4px;
+}
+
+.profile-row {
+	cursor: pointer;
+}
+
+.new-profile div{
+	height:100%;
+}
+
+#form-contact .profile img{
+	margin-top: 0;
+}
+
+#form-contact label,
+#form-position label,
+#form-personal label{
+	font-weight:bold;
+}
+
+
+#interests label {
+	font-weight:normal;
+}
+
+#comajor-fields {
+	background-color: #E3E3E3;
+	margin-left: -19px;
+	margin-right: -19px;
+	padding: 8px 19px;
+	border-bottom: 1px solid #CCC;
+	border-top: 1px solid #CCC;
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
+
+.help-block{
+	padding: 10px 10px 5px;
+	margin-top: -15px;
+	background-color: #ddd;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+	font-size: 11px;
+}
+
+.show-past-profile {
+	color: #bbb;
+}
+
+div.paragraph {
+	margin: 0 0 9px;
 }

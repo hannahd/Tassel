@@ -1,4 +1,16 @@
 <?php
+/**
+ * Main Directory of Tassel.
+ *
+ * This page allows users to view the directory, as well 
+ * as search, filter, and sort the profiles.
+ * 
+ * TODO: Add expand all, collapse all
+ * TODO: Add link from profile to individual profile page
+ * TODO: Add links & groups
+ * @author Hannah Deering
+ * @package Tassel
+ **/
 require_once ("constants/constants.php");
 require_once ("constants/dbconnect.php"); //Includes database connection
 require_once ("constants/controls.php"); //Includes functions
@@ -8,27 +20,28 @@ require_once ("constants/controls.php"); //Includes functions
 	<?php echo get_head_meta("Directory"); ?>
 	
 	<script type="text/javascript">
+	
+		// Updates the profiles shown based on filters, search, sort and view
 		function update_results(){
 			var datastring = $('#filters').serialize() + 						
 							 "&" + $("#filter-search").serialize() +
 						 	 "&" + $("#view").serialize() +
 							 "&" + $("#page").serialize() +
 							 "&" + $.trim($('#advanced-search-params').text()); 
-			//alert(datastring);
 			$.ajax({
 				type: "POST",
-				url: "<?php echo BASE; ?>/constants/get-profile.php?action=get",
+				url: "<?php echo BASE; ?>/constants/get_profile.php?action=get",
 				data: datastring,
 				success: function(response) {
-					$('#directory-profiles').show().html(response);
 					// Display directory table
-					//var obj = jQuery.parseJSON(response);
-					//$('#directory-profiles').show().html(obj.content);
-					//update_page_dd(obj.num_pages);
+					var obj = jQuery.parseJSON(response);
+					$('#directory-profiles').show().html(obj.content);
+					update_page_dd(obj.num_pages);
 				}
 			});
 		}
 		
+		// Updates the url after ajax calls
 		function update_url(){
 			var datastring = "";
 			// Add search
@@ -61,6 +74,7 @@ require_once ("constants/controls.php"); //Includes functions
 			window.location.hash = "#"+datastring;
 		}
 		
+		// Interprets the url into selected options on the page
 		function decode_url(){
 			var datastring = window.location.hash;
 			var pairs = datastring.split('&');
@@ -109,8 +123,9 @@ require_once ("constants/controls.php"); //Includes functions
 			}
 		}
 		
-		
+		// Updates the number of pages in the dropdown menu
 		function update_page_dd(num_pages){
+			var selected = $('#top-page :selected').val();
 			if(num_pages > 1){
 				var ret_val = "";
 				for (var i=1; i <= num_pages; i++) {
@@ -122,28 +137,39 @@ require_once ("constants/controls.php"); //Includes functions
 				$('#top-page-label').hide();
 				$('#top-page').hide();
 			}
+			$('#top-page').val(selected);
 		}
 		
+		// Displays profiles with certain interest (id)
 		function interest_link(id){
 			window.event.preventDefault();
-			clear_filters();
+			clear_filters(false);
 			$("#filter-interest").val(id);
-			update_results();
 			update_url();
 		}
 		
-		function page_link(pg){
+		// Shows block of former students
+		function show_past_profiles(id, preface){
 			window.event.preventDefault();
+			var div_id = "#past-" + preface + "-" + id;
+			var link_id = "#show-past-profile-" + preface + "-" + id;
+			$(div_id).show();
+			$(link_id).hide();
+		}
+		
+		// Displays a given page of results
+		function page_link(pg){
 			if(pg > 0){
 				$("#top-page").val(pg);
 				$('body,html').animate({scrollTop: 0}, 400);
-				update_results();
 				update_url();
 			}
+			window.event.preventDefault();
+			return false;
 		}
 		
+		// Shows or hides the expanded profile
 		function toggle_details(id){
-			window.event.preventDefault();
 			$('#expand-profile-'+id).toggle('fast', function() {
 			    if($(this).css('display') == "none") {
 					$('#toggle-'+id).html("+ more");
@@ -151,19 +177,26 @@ require_once ("constants/controls.php"); //Includes functions
 					$('#toggle-'+id).html("- less");
 				}
 			  });
+			window.event.preventDefault();
+			return false;
 		}
 		
-		function clear_filters(){
+		// Clears all filter, searches and view options
+		function clear_filters(refresh){
 			$("#filter-position").val("all");
 			$("#filter-department").val("all");
 			$("#filter-interest").val("all");
 			$("#filter-program").val("all");
 			$("#filter-company").val("all");
 			$("#filter-search").val("");
-			update_results();
-			window.location.hash = "";
+			$('#advanced-search-params').text("");
+			if(refresh){
+				window.location.hash = "";
+			}
 		}
 		
+		// Watches for a url change and makes the necessary changes to the page
+		// Necessary to keep back and forward working through ajax calls
 		$(window).bind( 'hashchange', function(e) {
 			decode_url();
 			update_results();
@@ -171,30 +204,37 @@ require_once ("constants/controls.php"); //Includes functions
 		
 		
 		$(document).ready(function(){
-			
+			// Initially set page
 			$('#top-page-label').hide();
 			$('#top-page').hide();
 			decode_url();
 			update_results();
 			
+			// Updates results based on changed values
 			$(".update").change(function() {
-				//update_results();
+				if($(this).attr('id') != 'top-page') {
+					$('#top-page').val(1);
+				}
 				update_url();	
 			});
 			
+			// Clears all filters
 			$("#clear").click(function(event) {
 				event.preventDefault();
-				clear_filters();
+				clear_filters(true);
 			});
 			
+			// Updates results as user types
 			$("#filter-search").keyup(function() {
 				update_results();	
 			});
 			
+			// Updates url when done typing in search box
 			$("#filter-search").focusout(function() {
 				update_url();	
 			});
 			
+			// Show spinning wheel when ajax calls are processing
 			var showLoader;
 			
 			$('#loading')
@@ -206,11 +246,6 @@ require_once ("constants/controls.php"); //Includes functions
 				window.clearTimeout(showLoader);
 		        $(this).fadeOut("fast");
 		    });
-			
-			/*var auto_refresh = setInterval(function(){
-					$('#directory-profiles').load("<?php echo BASE; ?>/constants/process.php?action=get");
-			}, 500000); //Refresh every 10 minutes */
-			
 		});
 		
 	</script>
@@ -220,24 +255,24 @@ require_once ("constants/controls.php"); //Includes functions
 	<noscript><div class="container"><div class="row"><div class="span4 offset4"><p class="error alert"Javascript must be enabled to view this directory.</p></div></div></div></noscript>
 	<div class="container">
 		<div class="row">
-			<div class="span2 well sidebar"> 
+			<div class="span3 well sidebar"> 
 				<h4>Search</h4>
-				<input class="span2 search-query" id="filter-search" name="search[]" size="16" type="text" placeholder="Search">
+				<input class="span3 search-query" id="filter-search" name="search[]" size="16" type="text" placeholder="Search">
 				<hr/>
 				<h4>Browse</h4>
 				<form name="filters" id="filters">
-					<label for="filter_position" class="filter-position">Position</label>
-					<select name="position[]" id="filter-position" class="span2 update filter-position">
+					<label for="filter_position">Position</label>
+					<select name="position[]" id="filter-position" class="span3 update filter">
 						<option value="all">All</option>
+						<option value="alumni">Alumni</option>
 						<option value="faculty">Faculty</option>
 						<option value="staff">Staff</option>
-						<option value="alumni">Alumni</option>
 						<option value="student">Student</option>
 						<option value="visitor">Visitor</option>
 					</select>
 					
-					<label for="filter-program" class="filter-program">Program</label>
-					<select name="program[]" id="filter-program" class="span2 update filter-program">
+					<label for="filter-program">Program</label>
+					<select name="program[]" id="filter-program" class="span3 update filter">
 						<option value="all">Any</option>
 						<?php
 							/*Populate programs*/
@@ -245,8 +280,8 @@ require_once ("constants/controls.php"); //Includes functions
 						?>
 					</select>
 				
-					<label for="filter-department" class="filter-department">Department</label>
-					<select name="department[]" id="filter-department" class="span2 update filter-department">
+					<label for="filter-department">Department</label>
+					<select name="department[]" id="filter-department" class="span3 update filter">
 						<option value="all">Any</option>
 						<?php
 							/*Populate departments*/
@@ -254,8 +289,8 @@ require_once ("constants/controls.php"); //Includes functions
 						?>
 					</select>
 					
-					<label for="filter-interest" class="filter-interest">Interests</label>
-					<select name="interest[]" id="filter-interest" class="span2 update filter-interest">
+					<label for="filter-interest">Interests</label>
+					<select name="interest[]" id="filter-interest" class="span3 update filter">
 						<option value="all">Any</option>
 						<?php
 							/*Populate interest*/
@@ -263,8 +298,8 @@ require_once ("constants/controls.php"); //Includes functions
 						?>
 					</select>
 				
-					<label for="filter-company" class="filter-company">Employer</label>
-					<select name="company[]" id="filter-company" class="span2 update filter-company">
+					<label for="filter-company" class="filter">Employer</label>
+					<select name="company[]" id="filter-company" class="span3 update filter">
 						<option value="all">Any</option>
 						<?php
 							/*Populate companies*/
@@ -306,7 +341,6 @@ require_once ("constants/controls.php"); //Includes functions
 						</select>
 					</form>
 				</div>
-				
 				
 				<!-- Directory Entries-->
 				<div id="directory-profiles"></div>

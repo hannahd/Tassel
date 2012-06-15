@@ -1,4 +1,15 @@
 <?php
+/**
+ * Advanced Search and Filter for Tassel.
+ *
+ * This page allows users to filter the directory with 
+ * multiple constraints.
+ * 
+ * TODO: Add search restriction options
+ * 
+ * @author Hannah Deering
+ * @package Tassel
+ **/
 require_once ("constants/constants.php");
 require_once ("constants/dbconnect.php"); //Includes database connection
 require_once ("constants/controls.php"); //Includes functions
@@ -9,17 +20,21 @@ require_once ("constants/controls.php"); //Includes functions
 	<?php echo get_head_meta("Advanced Search"); ?>
 	
 	<script type="text/javascript">
+		// Returns all clicked values to default
 		function clear(){
 			$(".not-all").prop("checked", false);
 			$(".all").prop("checked", true);
 			$("#search").val("");
 		}
+		
 		$(document).ready(function(){
+			// Returns all clicked values to default
 			$(".clear").click(function(event) {
 				event.preventDefault();
 				clear();
 			});
 			
+			// Unchecks all values when all is selected
 			$(".all").change(function(){
 				var myClass = $(this).attr("class");
 				var classes = myClass.split(' ');
@@ -29,6 +44,7 @@ require_once ("constants/controls.php"); //Includes functions
 				}
 			});
 			
+			// Unchecks all when any other values are selected
 			$(".not-all").change(function(){
 				var myClass = $(this).attr("class");
 				var classes = myClass.split(' ');
@@ -107,7 +123,6 @@ require_once ("constants/controls.php"); //Includes functions
 						echo interest_control("", true, "checkbox", "interest", "", "");
 					?>
 					<hr/>
-					
 					
 					<h3>Employer</h3>
 					<label class="checkbox">

@@ -1,11 +1,11 @@
 <?php
-	/**
-	 * Contains required constants for Tassel,
-	 * including MySQL Settings, development tools, secret keys.
-	 *
-	 * @author Hannah Deering
-	 * @package Tassel
-	 **/
+/**
+ * Contains required constants for Tassel,
+ * including MySQL Settings, development tools, secret keys.
+ *
+ * @author Hannah Deering
+ * @package Tassel
+ **/
 	
 //Determine if we're running on localhost or live
 if(stristr($_SERVER['HTTP_HOST'], 'local') || (substr($_SERVER['HTTP_HOST'], 0, 7) == '192.168')) {
@@ -108,10 +108,11 @@ define('PASSSALT', 'A-Kzl4wlSdVGGpq?- XS-DT^W+vr0(]JKz4>P`}-:3%PN~[LyS=KHsBeOC>N
  */
 if($local){
 	$debug = true;
-	if($debug){ error_reporting(E_ALL | E_STRICT);}
 } else {
 	$debug = false;
 }
+
+if($debug){ error_reporting(E_ALL | E_STRICT);}
 
 
 /**

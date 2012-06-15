@@ -239,6 +239,104 @@ a:hover {
 .offset1 {
   margin-left: 100px;
 }
+.span12.well, .well select.span12 {
+  width: 900px;
+}
+.span11.well, .well select.span11 {
+  width: 820px;
+}
+.span10.well, .well select.span10 {
+  width: 740px;
+}
+.span9.well, .well select.span9 {
+  width: 660px;
+}
+.span8.well, .well select.span8 {
+  width: 580px;
+}
+.span7.well, .well select.span7 {
+  width: 500px;
+}
+.span6.well, .well select.span6 {
+  width: 420px;
+}
+.span5.well, .well select.span5 {
+  width: 340px;
+}
+.span4.well, .well select.span4 {
+  width: 260px;
+}
+.span3.well, .well select.span3 {
+  width: 180px;
+}
+.span2.well, .well select.span2 {
+  width: 100px;
+}
+.span1.well, .well select.span1 {
+  width: 20px;
+}
+
+
+.well input.span12, 
+.well textarea.span12, 
+.well .uneditable-input.span12 {
+  width: 890px;
+}
+.well input.span11, 
+.well textarea.span11, 
+.well .uneditable-input.span11 {
+  width: 810px;
+}
+.well input.span10, 
+.well textarea.span10, 
+.well .uneditable-input.span10 {
+  width: 730px;
+}
+.well input.span9, 
+.well textarea.span9, 
+.well .uneditable-input.span9 {
+  width: 650px;
+}
+.well input.span8, 
+.well textarea.span8, 
+.well .uneditable-input.span8 {
+  width: 570px;
+}
+.well input.span7, 
+.well textarea.span7, 
+.well .uneditable-input.span7 {
+  width: 490px;
+}
+.well input.span6, 
+.well textarea.span6, 
+.well .uneditable-input.span6 {
+  width: 410px;
+}
+.well input.span5, 
+.well textarea.span5, 
+.well .uneditable-input.span5 {
+  width: 330px;
+}
+.well input.span4, 
+.well textarea.span4, 
+.well .uneditable-input.span4 {
+  width: 250px;
+}
+.well input.span3, 
+.well textarea.span3, 
+.well .uneditable-input.span3 {
+  width: 190px;
+}
+.well input.span2, 
+.well textarea.span2, 
+.well .uneditable-input.span2 {
+  width: 90px;
+}
+.well input.span1, 
+.well textarea.span1, 
+.well .uneditable-input.span1 {
+  width: 10px;
+}
 .row-fluid {
   width: 100%;
   *zoom: 1;
@@ -878,6 +976,7 @@ textarea[readonly] {
   background-color: #eeeeee;
   border-color: #ddd;
   cursor: not-allowed;
+  color: #999;
 }
 .control-group.warning > label,
 .control-group.warning .help-block,

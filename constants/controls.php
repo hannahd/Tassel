@@ -8,7 +8,7 @@
 	 * @package Tassel
 	 **/
 	
-	include_once "validation-functions.php";
+	include_once "validation_functions.php";
 	$max_char_length = 39;
 	
 	/** Creates dropdown and checkbox controls based on array of values. */
@@ -83,7 +83,7 @@
 		// Check that states were found.
 		if(mysql_num_rows($state_qry) > 0) {
 			// Loop through states and create array.
-			while($row = mysql_fetch_array($states_qry)) {
+			while($row = mysql_fetch_array($state_qry)) {
 				$states[$row['id']] = $row['name'];
 			}
 		}

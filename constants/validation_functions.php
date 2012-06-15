@@ -1,10 +1,10 @@
 <?php
-	/**
-	 * Contains functions to validate input for the Tassel database.
-	 *
-	 * @author Hannah Deering
-	 * @package Tassel
-	 **/
+/**
+ * Contains functions to validate input for the Tassel database.
+ *
+ * @author Hannah Deering
+ * @package Tassel
+ **/
 	
 /* Data Validators
  * =================================================================== */
@@ -22,15 +22,15 @@
 	    } else {
 			// Check if a required field is empty
 			if($is_required && empty($input)) {
-				$errors[] = $name .' is required.';
+				$errors[] =  ucwords($name) .' is required.';
 			} elseif(!empty($input)){
 				// Checks length and format of non-empty fields
 				if($min_char > 0 && strlen($input) < $min_char) {
-					$errors[] = $name.' must be at least '. $min_char . ' characters.';
+					$errors[] = ucwords($name).' must be at least '. $min_char . ' characters.';
 				} elseif($max_char > 0 && strlen($input) > $max_char) {
-					$errors[] = $name.' can be no more than '.$max_char.' characters.';
+					$errors[] = ucwords($name).' can be no more than '.$max_char.' characters.';
 				} elseif($format === "alphanum" && !valid_alphanum($input)) {
-					$errors[] = $name.' can only include alpha-numeric characters (a-z, A-Z, 0-9) and underscores.';
+					$errors[] = ucwords($name).' can only include alpha-numeric characters (a-z, A-Z, 0-9) and underscores.';
 				} elseif($format === "email" && !valid_email($input)) {
 					$errors[] = 'Please enter a valid email address (ex. "joe@shmo.com").';
 				} elseif($format === "url" && !valid_url($input)) {
@@ -48,7 +48,7 @@
 				} elseif($format === "name" ){
 					$invalid_char = valid_name($input);
 					if (!($invalid_char===TRUE)){
-						$errors[] = $name.' can not include' .$invalid_char. '.';
+						$errors[] = ucwords($name).' can not include' .$invalid_char. '.';
 					}
 				}
 			
@@ -154,6 +154,16 @@
 		}
 		return $input;
 	}
+	
+	/** Unify phone number into a single format. */
+	function formatPhone($number) {
+		//Remove anything that is not a number
+	    $number = preg_replace('/[^\d]/', '', $number); 
+	    if(strlen($number) < 10) {
+	        return false;
+	     }
+	    return substr($number, 0, 3) . '-' . substr($number, 3, 3) . '-' . substr($number, 6);
+	 }
 	
 	
 ?>

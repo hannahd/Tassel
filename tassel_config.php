@@ -5,7 +5,7 @@
  * Includes information about the departments, college and programs
  * for people in the directory. 
  *
- * This file is used during the installation. 
+ * This file is used only during the installation. 
  *
  * @author Hannah Deering
  * @package Tassel
